@@ -2,7 +2,17 @@
 
 import { useState, FormEvent } from "react";
 
-export default function Newsletter() {
+type NewsletterContent = {
+  eyebrow: string;
+  headingLine1: string;
+  headingLine2: string;
+  body: string;
+  placeholder: string;
+  button: string;
+  buttonSuccess: string;
+};
+
+export default function Newsletter({ content }: { content: NewsletterContent }) {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [subscribed, setSubscribed] = useState(false);
@@ -25,16 +35,15 @@ export default function Newsletter() {
   return (
     <section className="bg-brown px-6 py-20 text-center md:px-10">
       <p className="mb-4 text-[11px] font-medium uppercase tracking-[0.25em] text-gold">
-        Stay in the loop
+        {content.eyebrow}
       </p>
       <h2 className="mb-4 font-display text-[1.8rem] font-bold leading-tight text-cream md:text-[3rem]">
-        New drops.
+        {content.headingLine1}
         <br />
-        No noise.
+        {content.headingLine2}
       </h2>
       <p className="mx-auto mb-10 max-w-md text-[14px] font-light text-cream/55">
-        Join the Vextio list. First access to new pieces, restocks, and
-        stories from the studio.
+        {content.body}
       </p>
 
       <form
@@ -48,7 +57,7 @@ export default function Newsletter() {
             setEmail(e.target.value);
             if (error) setError("");
           }}
-          placeholder="your@email.com"
+          placeholder={content.placeholder}
           aria-label="Email address"
           suppressHydrationWarning
           className={`flex-1 border bg-cream/[0.08] px-5 py-3.5 text-[14px] text-cream placeholder:text-cream/35 focus:outline-none ${
@@ -59,7 +68,7 @@ export default function Newsletter() {
           type="submit"
           className="whitespace-nowrap bg-rust px-6 py-3.5 text-[12px] font-medium uppercase tracking-[0.12em] text-cream transition-colors hover:bg-[#7a3418]"
         >
-          {subscribed ? "Subscribed" : "Subscribe"}
+          {subscribed ? content.buttonSuccess : content.button}
         </button>
       </form>
       {error && (

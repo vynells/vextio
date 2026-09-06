@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "./CartContext";
@@ -14,6 +14,17 @@ const links = [
 export default function Nav() {
   const { items, count, isOpen, openCart, closeCart, removeItem } = useCart();
   const [open, setOpen] = useState(false);
+  const [logoText, setLogoText] = useState("Vextio");
+
+  useEffect(() => {
+    fetch("/api/content")
+      .then((res) => res.json())
+      .then((rows: { key: string; value: string }[]) => {
+        const logo = rows.find((r) => r.key === "nav_logo_text");
+        if (logo) setLogoText(logo.value);
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <>
@@ -22,7 +33,7 @@ export default function Nav() {
           href="/"
           className="font-display text-2xl font-black uppercase tracking-[0.12em] text-brown"
         >
-          Vextio
+          {logoText}
         </Link>
 
         <ul className="hidden gap-8 md:flex">

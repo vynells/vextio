@@ -1,7 +1,10 @@
-export default function Hero() {
+import { getSiteContent } from "@/lib/getSiteContent";
+
+export default async function Hero() {
+  const content = await getSiteContent();
+
   return (
     <section className="relative flex min-h-[88vh] items-center justify-center overflow-hidden bg-cream">
-      {/* ambient glow */}
       <div
         className="pointer-events-none absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-30 blur-[100px]"
         style={{
@@ -10,7 +13,6 @@ export default function Hero() {
         }}
       />
 
-      {/* star, cut off behind the wordmark */}
       <svg
         viewBox="0 0 200 200"
         className="pointer-events-none absolute h-[420px] w-[420px] md:h-[560px] md:w-[560px]"
@@ -48,7 +50,7 @@ export default function Hero() {
               "0 0 24px rgba(217,166,78,0.45), 0 0 60px rgba(217,166,78,0.22)",
           }}
         >
-          Vextio
+          {content.hero_heading || "Vextio"}
         </span>
       </h1>
     </section>
