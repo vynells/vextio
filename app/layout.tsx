@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Playfair_Display, DM_Sans } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/components/CartContext";
+import { EditModeProvider } from "@/components/EditModeContext";
+import AdminBar from "@/components/AdminBar";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -31,7 +33,12 @@ export default function RootLayout({
       <body
         className={`${playfair.variable} ${dmSans.variable} font-body bg-cream text-brown antialiased`}
       >
-        <CartProvider>{children}</CartProvider>
+        <EditModeProvider>
+          <CartProvider>
+            {children}
+            <AdminBar />
+          </CartProvider>
+        </EditModeProvider>
       </body>
     </html>
   );

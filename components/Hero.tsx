@@ -1,8 +1,8 @@
-import { getSiteContent } from "@/lib/getSiteContent";
+"use client";
 
-export default async function Hero() {
-  const content = await getSiteContent();
+import EditableText from "./EditableText";
 
+export default function Hero() {
   return (
     <section className="relative flex min-h-[88vh] items-center justify-center overflow-hidden bg-cream">
       <div
@@ -43,15 +43,14 @@ export default async function Hero() {
         </defs>
       </svg>
 
-      <h1 className="relative z-10 select-none text-center font-display text-[4rem] font-black uppercase tracking-[0.08em] text-brown md:text-[7.5rem]">
-        <span
-          style={{
-            textShadow:
-              "0 0 24px rgba(217,166,78,0.45), 0 0 60px rgba(217,166,78,0.22)",
-          }}
-        >
-          {content.hero_heading || "Vextio"}
-        </span>
+      <h1
+        className="relative z-10 select-none text-center font-display text-[4rem] font-black uppercase tracking-[0.08em] text-brown md:text-[7.5rem]"
+        style={{
+          textShadow:
+            "0 0 24px rgba(217,166,78,0.45), 0 0 60px rgba(217,166,78,0.22)",
+        }}
+      >
+        <EditableText contentKey="hero_heading" defaultValue="Vextio" as="span" />
       </h1>
     </section>
   );

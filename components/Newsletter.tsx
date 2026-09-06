@@ -1,18 +1,9 @@
 "use client";
 
 import { useState, FormEvent } from "react";
+import EditableText from "./EditableText";
 
-type NewsletterContent = {
-  eyebrow: string;
-  headingLine1: string;
-  headingLine2: string;
-  body: string;
-  placeholder: string;
-  button: string;
-  buttonSuccess: string;
-};
-
-export default function Newsletter({ content }: { content: NewsletterContent }) {
+export default function Newsletter() {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [subscribed, setSubscribed] = useState(false);
@@ -34,17 +25,32 @@ export default function Newsletter({ content }: { content: NewsletterContent }) 
 
   return (
     <section className="bg-brown px-6 py-20 text-center md:px-10">
-      <p className="mb-4 text-[11px] font-medium uppercase tracking-[0.25em] text-gold">
-        {content.eyebrow}
-      </p>
+      <EditableText
+        contentKey="newsletter_eyebrow"
+        defaultValue="Stay in the loop"
+        as="p"
+        className="mb-4 text-[11px] font-medium uppercase tracking-[0.25em] text-gold"
+      />
       <h2 className="mb-4 font-display text-[1.8rem] font-bold leading-tight text-cream md:text-[3rem]">
-        {content.headingLine1}
+        <EditableText
+          contentKey="newsletter_heading_line1"
+          defaultValue="New drops."
+          as="span"
+        />
         <br />
-        {content.headingLine2}
+        <EditableText
+          contentKey="newsletter_heading_line2"
+          defaultValue="No noise."
+          as="span"
+        />
       </h2>
-      <p className="mx-auto mb-10 max-w-md text-[14px] font-light text-cream/55">
-        {content.body}
-      </p>
+      <EditableText
+        contentKey="newsletter_body"
+        defaultValue="Join the Vextio list. First access to new pieces, restocks, and stories from the studio."
+        as="p"
+        multiline
+        className="mx-auto mb-10 max-w-md text-[14px] font-light text-cream/55"
+      />
 
       <form
         onSubmit={handleSubmit}
@@ -57,7 +63,7 @@ export default function Newsletter({ content }: { content: NewsletterContent }) 
             setEmail(e.target.value);
             if (error) setError("");
           }}
-          placeholder={content.placeholder}
+          placeholder="your@email.com"
           aria-label="Email address"
           suppressHydrationWarning
           className={`flex-1 border bg-cream/[0.08] px-5 py-3.5 text-[14px] text-cream placeholder:text-cream/35 focus:outline-none ${
@@ -68,7 +74,7 @@ export default function Newsletter({ content }: { content: NewsletterContent }) 
           type="submit"
           className="whitespace-nowrap bg-rust px-6 py-3.5 text-[12px] font-medium uppercase tracking-[0.12em] text-cream transition-colors hover:bg-[#7a3418]"
         >
-          {subscribed ? content.buttonSuccess : content.button}
+          {subscribed ? "Subscribed" : "Subscribe"}
         </button>
       </form>
       {error && (
