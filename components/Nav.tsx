@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useCart } from "./CartContext";
 
 const links = [
@@ -10,7 +11,7 @@ const links = [
 ];
 
 export default function Nav() {
-  const { count, isOpen, openCart, closeCart } = useCart();
+  const { items, count, isOpen, openCart, closeCart, removeItem } = useCart();
   const [open, setOpen] = useState(false);
 
   return (
@@ -74,49 +75,84 @@ export default function Nav() {
       </nav>
 
       {/* Cart drawer */}
-      {isOpen && (
-        <div className="fixed inset-0 z-[60]">
-          <div
-            className="absolute inset-0 bg-black/60"
-            onClick={closeCart}
-          />
-          <div className="absolute right-0 top-0 flex h-full w-full max-w-[380px] flex-col bg-cream px-6 py-6">
-            <div className="mb-8 flex items-center justify-between">
-              <h3 className="font-display text-xl font-bold text-brown">
-                Your cart
-              </h3>
-              <button
-                type="button"
-                onClick={closeCart}
-                aria-label="Close cart"
-                className="text-2xl leading-none text-brown"
-              >
-                ×
-              </button>
-            </div>
+      <div
+        className={`fixed inset-0 z-[60] transition-opacity duration-300 ${
+          isOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
+        }`}
+      >
+        <div className="absolute inset-0 bg-black/60" onClick={closeCart} />
+        <div
+          className={`absolute right-0 top-0 flex h-full w-full max-w-[380px] flex-col bg-cream px-6 py-6 transition-transform duration-300 ease-out ${
+            isOpen ? "translate-x-0" : "translate-x-full"
+          }`}
+        >
+          <div className="mb-8 flex items-center justify-between">
+            <h3 className="font-display text-xl font-bold text-brown">
+              Your cart
+            </h3>
+            <button
+              type="button"
+              onClick={closeCart}
+              aria-label="Close cart"
+              className="text-2xl leading-none text-brown"
+            >
+              ×
+            </button>
+          </div>
 
-            {count === 0 ? (
-              <p className="text-[14px] font-light text-muted">
-                Your cart is empty.
-              </p>
-            ) : (
-              <p className="text-[14px] font-light text-muted">
-                {count} {count === 1 ? "item" : "items"} in your cart.
-              </p>
-            )}
-
-            <div className="mt-auto">
-              <button
-                type="button"
-                disabled={count === 0}
-                className="w-full bg-rust px-6 py-3.5 text-[12px] font-medium uppercase tracking-[0.12em] text-cream transition-colors hover:bg-[#7a3418] disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                Checkout
-              </button>
+          {items.length === 0 ? (
+            <p className="text-[14px] font-light text-muted">
+              Your cart is empty.
+            </p>
+          ) : (
+            <div className="flex flex-1 flex-col gap-4 overflow-y-auto">
+              {items.map((item) => (
+                <div key={item.id} className="flex gap-3">
+                  <div className="relative h-20 w-16 flex-shrink-0 overflow-hidden bg-tan">
+                    <Image
+                      src={item.imageUrl}
+                      alt={item.name}
+                      fill
+                      sizes="64px"
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="flex flex-1 flex-col justify-center">
+                    <p className="text-[13px] font-medium text-brown">
+                      {item.name}
+                    </p>
+                    <p className="text-[12px] font-light text-muted">
+                      Qty {item.qty}
+                    </p>
+                    <p className="text-[13px] font-bold text-brown">
+                      {item.price}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeItem(item.id)}
+                    aria-label={`Remove ${item.name}`}
+                    className="self-start text-lg leading-none text-muted hover:text-brown"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
             </div>
+          )}
+
+          <div className="mt-auto pt-6">
+            <a
+              href="/checkout"
+              className={`block w-full bg-rust px-6 py-3.5 text-center text-[12px] font-medium uppercase tracking-[0.12em] text-cream transition-colors hover:bg-[#7a3418] ${
+                count === 0 ? "pointer-events-none opacity-40" : ""
+              }`}
+            >
+              Checkout
+            </a>
           </div>
         </div>
-      )}
+      </div>
     </>
   );
 }

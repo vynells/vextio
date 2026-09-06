@@ -1,16 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useCart } from "./CartContext";
 
 export type Product = {
+  id: string;
   name: string;
   detail: string;
   price: string;
   badge?: string;
-  swatchClass: string;
-  swatchLabel?: string;
-  imgClass?: string;
+  imageUrl: string;
 };
 
 export default function ProductCard({ product }: { product: Product }) {
@@ -18,27 +18,30 @@ export default function ProductCard({ product }: { product: Product }) {
   const [added, setAdded] = useState(false);
 
   function handleAdd() {
-    addItem();
+    addItem({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      imageUrl: product.imageUrl,
+    });
     setAdded(true);
     setTimeout(() => setAdded(false), 1200);
   }
 
   return (
     <div className="group cursor-pointer">
-      <div
-        className={`relative mb-4 flex aspect-[3/4] items-center justify-center overflow-hidden ${
-          product.imgClass ?? "bg-tan"
-        }`}
-      >
-        <div
-          className={`flex items-center justify-center transition-transform duration-500 group-hover:scale-[1.04] ${product.swatchClass}`}
-        >
-          {product.swatchLabel}
-        </div>
+      <div className="relative mb-4 flex aspect-[3/4] items-center justify-center overflow-hidden bg-tan">
+        <Image
+          src={product.imageUrl}
+          alt={product.name}
+          fill
+          sizes="(max-width: 768px) 50vw, 25vw"
+          className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+        />
 
         {product.badge && (
           <span
-            className={`absolute left-3 top-3 px-2 py-1 text-[10px] font-medium uppercase tracking-[0.12em] ${
+            className={`absolute left-3 top-3 z-10 px-2 py-1 text-[10px] font-medium uppercase tracking-[0.12em] ${
               product.badge === "Ltd."
                 ? "bg-gold text-brown"
                 : "bg-rust text-cream"

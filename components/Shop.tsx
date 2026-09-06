@@ -2,72 +2,63 @@ import ProductCard, { Product } from "./ProductCard";
 
 const products: Product[] = [
   {
+    id: "heritage-overshirt",
     name: "Heritage overshirt",
     detail: "Washed cotton · Mocha",
     price: "PKR 4,200",
     badge: "New",
-    swatchClass:
-      "h-[150px] w-[110px] bg-gradient-to-br from-brown from-60% to-tan to-60% relative font-display text-[11px] tracking-[0.2em] text-gold font-bold items-end justify-center pb-4",
-    swatchLabel: "VXTIO",
+    imageUrl: "https://www.trybloom.ai/img/3cf53fa7-a7fa-4514-a8af-b467629fcaaa",
   },
   {
+    id: "archive-longsleeve",
     name: "Archive longsleeve",
     detail: "Slub jersey · Ecru",
     price: "PKR 2,800",
-    swatchClass:
-      "h-[140px] w-[90px] bg-cream border border-brown/20 relative before:absolute before:top-2.5 before:left-2.5 before:right-2.5 before:h-0.5 before:bg-rust",
-    swatchLabel: "",
+    imageUrl: "https://www.trybloom.ai/img/815ecf3f-9ff4-4fe1-954b-cbc2fbacbb9e",
   },
   {
+    id: "wax-seal-cap",
     name: "Wax seal cap",
     detail: "Brushed wool · Black",
     price: "PKR 1,900",
     badge: "Ltd.",
-    imgClass: "bg-[#2A2420]",
-    swatchClass:
-      "h-20 w-20 rounded-full bg-[#2A2420] font-display text-3xl font-black text-gold",
-    swatchLabel: "V",
+    imageUrl: "https://www.trybloom.ai/img/2212a9d2-c387-4c1e-91be-ef4494edf391",
   },
   {
+    id: "vintage-tote",
     name: "Vintage tote",
     detail: "Canvas · Natural",
     price: "PKR 1,400",
-    swatchClass:
-      "h-20 w-[120px] -rotate-2 bg-tan font-display text-[10px] tracking-[0.3em] text-muted font-bold",
-    swatchLabel: "VEXTIO",
+    imageUrl: "https://www.trybloom.ai/img/a57b8c1e-797b-4b2a-b159-8c50caee3fe3",
   },
   {
+    id: "workwear-trousers",
     name: "Workwear trousers",
     detail: "Heavy twill · Olive",
     price: "PKR 3,600",
-    swatchClass:
-      "h-[150px] w-[100px] bg-[#4A5A3C] font-display text-[10px] tracking-[0.2em] text-cream font-bold items-end justify-center pb-4",
-    swatchLabel: "VXTIO",
+    imageUrl: "https://www.trybloom.ai/img/bca6ec4d-672b-48fd-ac7f-009dbbf7c8b2",
   },
   {
+    id: "frayed-denim-jacket",
     name: "Frayed denim jacket",
     detail: "Rigid denim · Indigo",
     price: "PKR 5,400",
     badge: "New",
-    swatchClass:
-      "h-[150px] w-[110px] bg-[#2E3A52] font-display text-[10px] tracking-[0.2em] text-cream font-bold items-end justify-center pb-4",
-    swatchLabel: "VXTIO",
+    imageUrl: "https://www.trybloom.ai/img/728d4dfd-fd92-43f3-ac6a-f3c9190fa854",
   },
   {
+    id: "ribbed-knit-vest",
     name: "Ribbed knit vest",
     detail: "Merino blend · Charcoal",
     price: "PKR 2,300",
-    swatchClass:
-      "h-[130px] w-[95px] bg-[#3A3A3A] relative before:absolute before:top-3 before:left-3 before:right-3 before:h-0.5 before:bg-gold",
-    swatchLabel: "",
+    imageUrl: "https://www.trybloom.ai/img/2c15c350-dcd5-456a-8782-c4788608f5a6",
   },
   {
+    id: "leather-belt",
     name: "Leather belt",
     detail: "Full grain · Tan",
     price: "PKR 1,600",
-    swatchClass:
-      "h-10 w-[130px] bg-[#8A5A2B] font-display text-[9px] tracking-[0.25em] text-cream font-bold",
-    swatchLabel: "VEXTIO",
+    imageUrl: "https://www.trybloom.ai/img/f613a3c4-6120-4f54-9221-fea0e807fef8",
   },
 ];
 
@@ -93,7 +84,7 @@ export default function Shop() {
 
       <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
         {products.map((product) => (
-          <ProductCard key={product.name} product={product} />
+          <ProductCard key={product.id} product={product} />
         ))}
       </div>
     </section>

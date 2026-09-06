@@ -2,9 +2,21 @@
 
 import { createContext, useContext, useState, ReactNode } from "react";
 
+export type CartItem = {
+  id: string;
+  name: string;
+  price: string;
+  imageUrl: string;
+  qty: number;
+};
+
+type AddableProduct = Omit<CartItem, "qty">;
+
 type CartContextType = {
+  items: CartItem[];
   count: number;
-  addItem: () => void;
+  addItem: (product: AddableProduct) => void;
+  removeItem: (id: string) => void;
   isOpen: boolean;
   openCart: () => void;
   closeCart: () => void;
@@ -13,11 +25,23 @@ type CartContextType = {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [count, setCount] = useState(0);
+  const [items, setItems] = useState<CartItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
 
-  function addItem() {
-    setCount((c) => c + 1);
+  function addItem(product: AddableProduct) {
+    setItems((prev) => {
+      const existing = prev.find((i) => i.id === product.id);
+      if (existing) {
+        return prev.map((i) =>
+          i.id === product.id ? { ...i, qty: i.qty + 1 } : i
+        );
+      }
+      return [...prev, { ...product, qty: 1 }];
+    });
+  }
+
+  function removeItem(id: string) {
+    setItems((prev) => prev.filter((i) => i.id !== id));
   }
 
   function openCart() {
@@ -28,9 +52,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setIsOpen(false);
   }
 
+  const count = items.reduce((sum, i) => sum + i.qty, 0);
+
   return (
     <CartContext.Provider
-      value={{ count, addItem, isOpen, openCart, closeCart }}
+      value={{ items, count, addItem, removeItem, isOpen, openCart, closeCart }}
     >
       {children}
     </CartContext.Provider>
