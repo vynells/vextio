@@ -20,13 +20,20 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const { id, name, detail, price, badge, imageUrl } = body;
 
-  if (!id || !name || !detail || !price || !imageUrl) {
-    return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+  if (!id || !name) {
+    return NextResponse.json({ error: "Missing name" }, { status: 400 });
   }
 
   await sql`
     INSERT INTO products (id, name, detail, price, badge, image_url)
-    VALUES (${id}, ${name}, ${detail}, ${price}, ${badge || null}, ${imageUrl})
+    VALUES (
+      ${id},
+      ${name},
+      ${detail || "—"},
+      ${price || "—"},
+      ${badge || null},
+      ${imageUrl || "https://placehold.co/400x500/1C1917/9B9188?text=No+image"}
+    )
   `;
 
   return NextResponse.json({ success: true });

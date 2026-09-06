@@ -117,10 +117,20 @@ export default function AdminPage() {
     e.preventDefault();
     setFormError("");
 
-    if (!form.name || !form.detail || !form.price || !form.imageUrl) {
-      setFormError("Please fill in all required fields and upload an image.");
+    if (!form.name.trim()) {
+      setFormError("Please at least give the product a name.");
       return;
     }
+
+    const payload = {
+      ...form,
+      name: form.name.trim(),
+      detail: form.detail.trim() || "—",
+      price: form.price.trim() || "—",
+      imageUrl:
+        form.imageUrl.trim() ||
+        "https://placehold.co/400x500/1C1917/9B9188?text=No+image",
+    };
 
     if (editingId) {
       const res = await fetch(`/api/products/${editingId}`, {
@@ -129,7 +139,7 @@ export default function AdminPage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
       if (!res.ok) {
         setFormError("Failed to update product.");
@@ -146,7 +156,7 @@ export default function AdminPage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ ...form, id }),
+        body: JSON.stringify({ ...payload, id }),
       });
       if (!res.ok) {
         setFormError("Failed to add product. The ID might already exist.");
