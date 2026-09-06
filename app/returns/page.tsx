@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 
@@ -76,12 +77,12 @@ export default function ReturnPolicy() {
           </section>
         </div>
 
-        <a
+        <Link
           href="/"
           className="mt-16 inline-block border border-brown px-8 py-3.5 text-[13px] font-medium uppercase tracking-[0.1em] text-brown transition-colors hover:bg-brown hover:text-cream"
         >
           Return to home
-        </a>
+        </Link>
       </main>
       <Footer />
     </>
