@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
 
     await resend.emails.send({
       from: "Vextio Orders <onboarding@resend.dev>",
-      to: "vynelia4@gmail.com",
+      to: "mohsin.rasheed2010@gmail.com",
       subject: `New order from ${firstName} ${lastName}`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px;">
