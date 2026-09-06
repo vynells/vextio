@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useCart } from "./CartContext";
 
 const links = [
@@ -17,22 +18,22 @@ export default function Nav() {
   return (
     <>
       <nav className="sticky top-0 z-50 flex items-center justify-between border-b border-brown/15 bg-cream px-6 py-4 md:px-10">
-        <a
+        <Link
           href="/"
           className="font-display text-2xl font-black uppercase tracking-[0.12em] text-brown"
         >
           Vextio
-        </a>
+        </Link>
 
         <ul className="hidden gap-8 md:flex">
           {links.map((link) => (
             <li key={link.label}>
-              <a
+              <Link
                 href={link.href}
                 className="text-[13px] font-medium uppercase tracking-[0.1em] text-muted transition-colors hover:text-brown"
               >
                 {link.label}
-              </a>
+              </Link>
             </li>
           ))}
         </ul>
@@ -61,13 +62,13 @@ export default function Nav() {
           <ul className="absolute left-0 right-0 top-full flex flex-col gap-4 border-b border-brown/15 bg-cream px-6 py-6 md:hidden">
             {links.map((link) => (
               <li key={link.label}>
-                <a
+                <Link
                   href={link.href}
                   onClick={() => setOpen(false)}
                   className="text-sm font-medium uppercase tracking-[0.1em] text-muted"
                 >
                   {link.label}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
@@ -142,14 +143,14 @@ export default function Nav() {
           )}
 
           <div className="mt-auto pt-6">
-            <a
+            <Link
               href="/checkout"
               className={`block w-full bg-rust px-6 py-3.5 text-center text-[12px] font-medium uppercase tracking-[0.12em] text-cream transition-colors hover:bg-[#7a3418] ${
                 count === 0 ? "pointer-events-none opacity-40" : ""
               }`}
             >
               Checkout
-            </a>
+            </Link>
           </div>
         </div>
       </div>
