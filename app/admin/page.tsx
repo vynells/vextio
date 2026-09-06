@@ -2,6 +2,7 @@
 
 import { useState, useEffect, FormEvent } from "react";
 import Image from "next/image";
+import { useEditMode } from "@/components/EditModeContext";
 
 type Product = {
   id: string;
@@ -12,10 +13,8 @@ type Product = {
   image_url: string;
 };
 
-const STORAGE_KEY = "vextio-admin-token";
-
 export default function AdminPage() {
-  const [token, setToken] = useState<string | null>(null);
+  const { isAdmin, token, login: loginToEditMode, logout: logoutFromEditMode } = useEditMode();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
@@ -33,11 +32,6 @@ export default function AdminPage() {
   });
   const [uploading, setUploading] = useState(false);
   const [formError, setFormError] = useState("");
-
-  useEffect(() => {
-    const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (stored) setToken(stored);
-  }, []);
 
   useEffect(() => {
     if (token) fetchProducts();
@@ -65,13 +59,11 @@ export default function AdminPage() {
       return;
     }
     const data = await res.json();
-    window.localStorage.setItem(STORAGE_KEY, data.token);
-    setToken(data.token);
+    loginToEditMode(data.token);
   }
 
   function handleLogout() {
-    window.localStorage.removeItem(STORAGE_KEY);
-    setToken(null);
+    logoutFromEditMode();
   }
 
   function resetForm() {
