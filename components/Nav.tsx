@@ -5,9 +5,9 @@ import Image from "next/image";
 import { useCart } from "./CartContext";
 
 const links = [
-  { label: "Shop", href: "#shop" },
-  { label: "Collections", href: "#shop" },
-  { label: "Lookbook", href: "#lookbook" },
+  { label: "Shop", href: "/products" },
+  { label: "Collections", href: "/products" },
+  { label: "Terms", href: "/terms" },
 ];
 
 export default function Nav() {
@@ -18,7 +18,7 @@ export default function Nav() {
     <>
       <nav className="sticky top-0 z-50 flex items-center justify-between border-b border-brown/15 bg-cream px-6 py-4 md:px-10">
         <a
-          href="#"
+          href="/"
           className="font-display text-2xl font-black uppercase tracking-[0.12em] text-brown"
         >
           Vextio
