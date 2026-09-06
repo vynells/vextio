@@ -1,20 +1,19 @@
 import Nav from "@/components/Nav";
 import Hero from "@/components/Hero";
-import Marquee from "@/components/Marquee";
-import Shop from "@/components/Shop";
-import Lookbook from "@/components/Lookbook";
+import ShopTeaser from "@/components/ShopTeaser";
 import Newsletter from "@/components/Newsletter";
 import Footer from "@/components/Footer";
+import Reveal from "@/components/Reveal";
 
 export default function Home() {
   return (
     <>
       <Nav />
       <Hero />
-      <Marquee />
-      <Shop />
-      <Lookbook />
-      <Newsletter />
+      <ShopTeaser />
+      <Reveal>
+        <Newsletter />
+      </Reveal>
       <Footer />
     </>
   );
