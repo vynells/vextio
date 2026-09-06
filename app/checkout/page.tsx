@@ -18,13 +18,48 @@ export default function CheckoutPage() {
   const [postalCode, setPostalCode] = useState("");
   const [phone, setPhone] = useState("");
   const [saveInfo, setSaveInfo] = useState(false);
-  const [payment, setPayment] = useState<PaymentMethod>("cod");
+  const [payment] = useState<PaymentMethod>("cod");
   const [placed, setPlaced] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
-  function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (payment !== "cod") return; // safety guard, button is disabled anyway
-    setPlaced(true);
+    if (payment !== "cod" || items.length === 0) return;
+
+    setSubmitting(true);
+    setError("");
+
+    try {
+      const res = await fetch("/api/send-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contact,
+          firstName,
+          lastName,
+          address,
+          apartment,
+          city,
+          postalCode,
+          phone,
+          paymentMethod: "Cash on Delivery",
+          items,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to send order");
+      }
+
+      setPlaced(true);
+    } catch {
+      setError(
+        "Something went wrong placing your order. Please try again or contact us directly."
+      );
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   if (placed) {
@@ -37,10 +72,8 @@ export default function CheckoutPage() {
           Thanks, {firstName}.
         </h1>
         <p className="text-[14px] font-light leading-relaxed text-muted">
-          Your order will be delivered to {address}, {city}. Pay{" "}
-          {items.reduce((s) => s, 0) >= 0 ? "" : ""}
-          in cash when it arrives. We&apos;ll contact you at {contact} with
-          updates.
+          Your order will be delivered to {address}, {city}. Pay in cash when
+          it arrives. We&apos;ll contact you at {contact} with updates.
         </p>
       </main>
     );
@@ -162,41 +195,43 @@ export default function CheckoutPage() {
             <PaymentOption
               id="card"
               label="Card (Debit & Credit)"
-              selected={payment === "card"}
+              selected={false}
               disabled
-              onSelect={() => {}}
             />
             <PaymentOption
               id="bank"
               label="All Pakistani banks"
-              selected={payment === "bank"}
+              selected={false}
               disabled
-              onSelect={() => {}}
             />
             <PaymentOption
               id="easypaisa"
               label="Easypaisa"
-              selected={payment === "easypaisa"}
+              selected={false}
               disabled
-              onSelect={() => {}}
             />
             <PaymentOption
               id="cod"
               label="Cash on Delivery (COD)"
               selected={payment === "cod"}
               disabled={false}
-              onSelect={() => setPayment("cod")}
               isLast
             />
           </div>
         </section>
 
+        {error && (
+          <p className="text-[13px] text-red-500" role="alert">
+            {error}
+          </p>
+        )}
+
         <button
           type="submit"
-          disabled={items.length === 0}
+          disabled={items.length === 0 || submitting}
           className="w-full bg-rust px-6 py-4 text-[13px] font-medium uppercase tracking-[0.12em] text-cream transition-colors hover:bg-[#7a3418] disabled:cursor-not-allowed disabled:opacity-40"
         >
-          Place order — Cash on Delivery
+          {submitting ? "Placing order..." : "Place order — Cash on Delivery"}
         </button>
       </form>
 
@@ -256,14 +291,12 @@ function PaymentOption({
   label,
   selected,
   disabled,
-  onSelect,
   isLast,
 }: {
   id: string;
   label: string;
   selected: boolean;
   disabled: boolean;
-  onSelect: () => void;
   isLast?: boolean;
 }) {
   return (
@@ -280,7 +313,7 @@ function PaymentOption({
           name="payment"
           checked={selected}
           disabled={disabled}
-          onChange={onSelect}
+          readOnly
           className="h-4 w-4"
         />
         <span className="text-brown">{label}</span>
