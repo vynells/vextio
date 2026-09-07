@@ -31,20 +31,8 @@ export default function Nav() {
       <nav className="sticky top-0 z-50 flex items-center justify-between border-b border-brown/15 bg-cream px-6 py-4 md:px-10">
         <Link
           href="/"
-          className="flex items-center gap-2 font-display text-2xl font-black uppercase tracking-[0.12em] text-brown"
+          className="font-display text-2xl font-black uppercase tracking-[0.12em] text-brown"
         >
-          <svg viewBox="0 0 400 400" className="h-6 w-6">
-            <defs>
-              <linearGradient id="navStarGrad" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="#D9A64E" />
-                <stop offset="100%" stopColor="#C1553A" />
-              </linearGradient>
-            </defs>
-            <polygon
-              points="200,20 231,148 362,148 256,226 288,354 200,276 112,354 144,226 38,148 169,148"
-              fill="url(#navStarGrad)"
-            />
-          </svg>
           {logoText}
         </Link>
 
