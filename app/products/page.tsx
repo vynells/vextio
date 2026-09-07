@@ -42,8 +42,9 @@ export default function ProductsPage() {
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [selectedCategory, setSelectedCategory] = useState<string>("");
-  const [selectedSubcategory, setSelectedSubcategory] = useState<string>("");
+  const [activeCategory, setActiveCategory] = useState<string>("");
+  const [activeSubcategory, setActiveSubcategory] = useState<string>("");
+  const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -54,30 +55,55 @@ export default function ProductsPage() {
       setProducts(p);
       setCategories(c);
       setSubcategories(s);
-      if (c.length > 0) setSelectedCategory(c[0].id);
+      // default to the first category that has NO subsections (directly viewable)
+      const firstDirect = c.find(
+        (cat: Category) => !s.some((sub: Subcategory) => sub.category_id === cat.id)
+      );
+      if (firstDirect) {
+        setActiveCategory(firstDirect.id);
+      } else if (c.length > 0) {
+        // fall back: first category's first subsection
+        const firstSub = s.find((sub: Subcategory) => sub.category_id === c[0].id);
+        if (firstSub) {
+          setActiveCategory(c[0].id);
+          setActiveSubcategory(firstSub.id);
+        }
+      }
       setLoading(false);
     });
   }, []);
 
-  const subsOfSelected = subcategories.filter(
-    (s) => s.category_id === selectedCategory
-  );
-  const categoryHasSubsections = subsOfSelected.length > 0;
-
-  function handleCategoryChange(categoryId: string) {
-    setSelectedCategory(categoryId);
-    setSelectedSubcategory("");
+  function subsOf(categoryId: string) {
+    return subcategories.filter((s) => s.category_id === categoryId);
   }
 
-  const visibleProducts = (() => {
-    if (!selectedCategory) return [];
-    if (categoryHasSubsections) {
-      if (!selectedSubcategory) return null; // must choose a subsection first
-      return products.filter((p) => p.subcategory_id === selectedSubcategory);
+  function handleCategoryClick(cat: Category) {
+    const subs = subsOf(cat.id);
+    if (subs.length > 0) return; // can't click directly, must hover and pick a subsection
+    setActiveCategory(cat.id);
+    setActiveSubcategory("");
+  }
+
+  function handleSubcategoryClick(categoryId: string, sub: Subcategory) {
+    setActiveCategory(categoryId);
+    setActiveSubcategory(sub.id);
+    setHoveredCategory(null);
+  }
+
+  const visibleProducts = activeSubcategory
+    ? products.filter((p) => p.subcategory_id === activeSubcategory)
+    : activeCategory
+    ? products.filter((p) => p.category_id === activeCategory && !p.subcategory_id)
+    : [];
+
+  const activeLabel = (() => {
+    if (activeSubcategory) {
+      const sub = subcategories.find((s) => s.id === activeSubcategory);
+      const cat = categories.find((c) => c.id === activeCategory);
+      return sub && cat ? `${cat.name} — ${sub.name}` : "";
     }
-    return products.filter(
-      (p) => p.category_id === selectedCategory && !p.subcategory_id
-    );
+    const cat = categories.find((c) => c.id === activeCategory);
+    return cat?.name || "";
   })();
 
   if (loading) {
@@ -114,41 +140,70 @@ export default function ProductsPage() {
           </p>
         ) : (
           <>
+            {/* Category nav with hover-to-reveal subsections */}
             <Reveal delay={150}>
-              <div className="mx-auto mb-10 flex max-w-[500px] flex-col gap-3 sm:flex-row">
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => handleCategoryChange(e.target.value)}
-                  className="flex-1 border border-brown/25 bg-cream px-4 py-3 text-[14px] text-brown focus:outline-none"
-                >
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
+              <div className="mx-auto mb-4 flex max-w-[900px] flex-wrap justify-center gap-1 border-b border-brown/15 pb-4">
+                {categories.map((cat) => {
+                  const subs = subsOf(cat.id);
+                  const hasSubs = subs.length > 0;
+                  const isActive = activeCategory === cat.id;
 
-                {categoryHasSubsections && (
-                  <select
-                    value={selectedSubcategory}
-                    onChange={(e) => setSelectedSubcategory(e.target.value)}
-                    className="flex-1 border border-brown/25 bg-cream px-4 py-3 text-[14px] text-brown focus:outline-none"
-                  >
-                    <option value="">Choose a type...</option>
-                    {subsOfSelected.map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.name}
-                      </option>
-                    ))}
-                  </select>
-                )}
+                  return (
+                    <div
+                      key={cat.id}
+                      className="relative"
+                      onMouseEnter={() => hasSubs && setHoveredCategory(cat.id)}
+                      onMouseLeave={() => setHoveredCategory(null)}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => handleCategoryClick(cat)}
+                        className={`px-5 py-2.5 text-[13px] font-medium uppercase tracking-[0.1em] transition-colors ${
+                          isActive
+                            ? "text-rust"
+                            : "text-muted hover:text-brown"
+                        } ${hasSubs ? "cursor-default" : "cursor-pointer"}`}
+                      >
+                        {cat.name}
+                        {hasSubs && <span className="ml-1 text-[10px]">▾</span>}
+                      </button>
+
+                      {hasSubs && hoveredCategory === cat.id && (
+                        <div className="absolute left-1/2 top-full z-20 flex -translate-x-1/2 flex-col border border-brown/15 bg-cream py-1 shadow-lg">
+                          {subs.map((sub) => (
+                            <button
+                              key={sub.id}
+                              type="button"
+                              onClick={() => handleSubcategoryClick(cat.id, sub)}
+                              className={`whitespace-nowrap px-6 py-2 text-left text-[13px] transition-colors ${
+                                activeSubcategory === sub.id
+                                  ? "bg-tan text-rust"
+                                  : "text-brown hover:bg-tan/50"
+                              }`}
+                            >
+                              {sub.name}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </Reveal>
 
+            {activeLabel && (
+              <Reveal delay={200}>
+                <p className="mb-8 text-center text-[12px] uppercase tracking-[0.15em] text-muted">
+                  Showing: {activeLabel}
+                </p>
+              </Reveal>
+            )}
+
             <div className="mx-auto max-w-[1200px]">
-              {visibleProducts === null ? (
+              {!activeCategory ? (
                 <p className="text-center text-[14px] text-muted">
-                  Choose a type above to see these pieces.
+                  Hover a section above and choose a type to see pieces.
                 </p>
               ) : visibleProducts.length === 0 ? (
                 <p className="text-center text-[14px] text-muted">
