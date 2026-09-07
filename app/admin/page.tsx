@@ -34,6 +34,9 @@ export default function AdminPage() {
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
 
+  const [activeTab, setActiveTab] = useState<"products" | "sections">("products");
+  const [showForm, setShowForm] = useState(false);
+
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
@@ -163,6 +166,7 @@ export default function AdminPage() {
     });
     setEditingId(null);
     setFormError("");
+    setShowForm(false);
   }
 
   function startEdit(p: Product) {
@@ -177,6 +181,7 @@ export default function AdminPage() {
       categoryId: p.category_id || "",
       subcategoryId: p.subcategory_id || "",
     });
+    setShowForm(true);
   }
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -315,10 +320,8 @@ export default function AdminPage() {
 
   return (
     <main className="mx-auto max-w-[900px] px-6 py-12">
-      <div className="mb-8 flex items-center justify-between">
-        <h1 className="font-display text-2xl font-bold text-brown">
-          Manage store
-        </h1>
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="font-display text-2xl font-bold text-brown">Store</h1>
         <button
           type="button"
           onClick={logoutFromEditMode}
@@ -328,266 +331,349 @@ export default function AdminPage() {
         </button>
       </div>
 
-      {/* Sections management */}
-      <section className="mb-12 border border-brown/15 p-6">
-        <h2 className="mb-4 font-display text-lg font-bold text-brown">
-          Sections
-        </h2>
+      {/* Tabs */}
+      <div className="mb-8 flex gap-1 border-b border-brown/15">
+        <button
+          type="button"
+          onClick={() => setActiveTab("products")}
+          className={`px-4 py-2.5 text-[13px] font-medium uppercase tracking-wide transition-colors ${
+            activeTab === "products"
+              ? "border-b-2 border-rust text-brown"
+              : "text-muted hover:text-brown"
+          }`}
+        >
+          Products ({products.length})
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("sections")}
+          className={`px-4 py-2.5 text-[13px] font-medium uppercase tracking-wide transition-colors ${
+            activeTab === "sections"
+              ? "border-b-2 border-rust text-brown"
+              : "text-muted hover:text-brown"
+          }`}
+        >
+          Sections ({categories.length})
+        </button>
+      </div>
 
-        <div className="mb-6 flex flex-col gap-3">
-          {categories.map((cat) => (
-            <div key={cat.id}>
-              <div className="flex items-center justify-between border border-brown/10 bg-tan/20 px-4 py-2.5">
-                <span className="text-[14px] font-medium text-brown">
-                  {cat.name}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => handleDeleteCategory(cat.id)}
-                  className="text-[11px] uppercase tracking-wide text-red-500 hover:text-red-700"
-                >
-                  Delete section
-                </button>
-              </div>
-              <div className="ml-4 mt-1.5 flex flex-col gap-1.5">
-                {subcategories
-                  .filter((s) => s.category_id === cat.id)
-                  .map((sub) => (
-                    <div
-                      key={sub.id}
-                      className="flex items-center justify-between border-l-2 border-brown/15 px-3 py-1.5 text-[13px]"
-                    >
-                      <span className="text-muted">{sub.name}</span>
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteSubcategory(sub.id)}
-                        className="text-[10px] uppercase tracking-wide text-red-500 hover:text-red-700"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  ))}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <form onSubmit={handleAddCategory} className="flex flex-col gap-2">
-            <label className="text-[11px] font-medium uppercase tracking-wide text-muted">
-              New section (e.g. Tops)
-            </label>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={newCategoryName}
-                onChange={(e) => setNewCategoryName(e.target.value)}
-                placeholder="Section name"
-                className="flex-1 border border-brown/20 bg-transparent px-3 py-2 text-[13px] text-brown focus:outline-none"
-              />
-              <button
-                type="submit"
-                className="bg-brown px-4 py-2 text-[11px] uppercase tracking-wide text-cream"
-              >
-                Add
-              </button>
-            </div>
-          </form>
-
-          <form onSubmit={handleAddSubcategory} className="flex flex-col gap-2">
-            <label className="text-[11px] font-medium uppercase tracking-wide text-muted">
-              New subsection (e.g. Cargo under Bottoms)
-            </label>
-            <div className="flex gap-2">
-              <select
-                value={newSubcategoryParent}
-                onChange={(e) => setNewSubcategoryParent(e.target.value)}
-                className="border border-brown/20 bg-transparent px-2 py-2 text-[13px] text-brown focus:outline-none"
-              >
-                <option value="">Section...</option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-              <input
-                type="text"
-                value={newSubcategoryName}
-                onChange={(e) => setNewSubcategoryName(e.target.value)}
-                placeholder="Subsection name"
-                className="flex-1 border border-brown/20 bg-transparent px-3 py-2 text-[13px] text-brown focus:outline-none"
-              />
-              <button
-                type="submit"
-                className="bg-brown px-4 py-2 text-[11px] uppercase tracking-wide text-cream"
-              >
-                Add
-              </button>
-            </div>
-          </form>
-        </div>
-      </section>
-
-      {/* Product form */}
-      <form
-        onSubmit={handleSubmit}
-        className="mb-12 flex flex-col gap-3 border border-brown/15 p-6"
-      >
-        <h2 className="mb-2 font-display text-lg font-bold text-brown">
-          {editingId ? "Edit product" : "Add new product"}
-        </h2>
-
-        <input
-          type="text"
-          placeholder="Name"
-          value={form.name}
-          onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-          className="border border-brown/20 bg-transparent px-4 py-2.5 text-[14px] text-brown focus:outline-none focus:border-brown"
-        />
-        <input
-          type="text"
-          placeholder="Detail (e.g. Washed cotton · Mocha)"
-          value={form.detail}
-          onChange={(e) => setForm((f) => ({ ...f, detail: e.target.value }))}
-          className="border border-brown/20 bg-transparent px-4 py-2.5 text-[14px] text-brown focus:outline-none focus:border-brown"
-        />
-        <input
-          type="text"
-          placeholder="Price (e.g. PKR 2,500)"
-          value={form.price}
-          onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
-          className="border border-brown/20 bg-transparent px-4 py-2.5 text-[14px] text-brown focus:outline-none focus:border-brown"
-        />
-        <input
-          type="text"
-          placeholder="Badge (optional, e.g. New or Ltd.)"
-          value={form.badge}
-          onChange={(e) => setForm((f) => ({ ...f, badge: e.target.value }))}
-          className="border border-brown/20 bg-transparent px-4 py-2.5 text-[14px] text-brown focus:outline-none focus:border-brown"
-        />
-
-        <div className="grid grid-cols-2 gap-3">
-          <select
-            value={form.categoryId}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, categoryId: e.target.value, subcategoryId: "" }))
-            }
-            className="border border-brown/20 bg-transparent px-3 py-2.5 text-[13px] text-brown focus:outline-none"
-          >
-            <option value="">No section</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={form.subcategoryId}
-            onChange={(e) => setForm((f) => ({ ...f, subcategoryId: e.target.value }))}
-            disabled={!form.categoryId}
-            className="border border-brown/20 bg-transparent px-3 py-2.5 text-[13px] text-brown focus:outline-none disabled:opacity-40"
-          >
-            <option value="">No subsection</option>
-            {relevantSubcategories.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <input type="file" accept="image/*" onChange={handleImageUpload} />
-          {uploading && (
-            <span className="text-[12px] text-muted">Uploading...</span>
-          )}
-        </div>
-
-        {form.imageUrl && (
-          <div className="relative h-32 w-24 overflow-hidden bg-tan">
-            <Image
-              src={form.imageUrl}
-              alt="Preview"
-              fill
-              sizes="96px"
-              className="object-cover"
-            />
-          </div>
-        )}
-
-        {formError && <p className="text-[13px] text-red-500">{formError}</p>}
-
-        <div className="mt-2 flex gap-3">
-          <button
-            type="submit"
-            className="bg-rust px-6 py-2.5 text-[13px] font-medium uppercase tracking-[0.1em] text-cream hover:bg-[#7a3418]"
-          >
-            {editingId ? "Save changes" : "Add product"}
-          </button>
-          {editingId && (
+      {activeTab === "products" && (
+        <>
+          {!showForm ? (
             <button
               type="button"
-              onClick={resetForm}
-              className="px-6 py-2.5 text-[13px] font-medium uppercase tracking-[0.1em] text-muted hover:text-brown"
+              onClick={() => setShowForm(true)}
+              className="mb-8 w-full border-2 border-dashed border-brown/25 py-4 text-[13px] font-medium uppercase tracking-wide text-muted hover:border-brown/50 hover:text-brown"
             >
-              Cancel
+              + Add a new product
             </button>
-          )}
-        </div>
-      </form>
-
-      <h2 className="mb-4 font-display text-lg font-bold text-brown">
-        Current products ({products.length})
-      </h2>
-
-      {loading ? (
-        <p className="text-[14px] text-muted">Loading...</p>
-      ) : (
-        <div className="flex flex-col gap-3">
-          {products.map((p) => (
-            <div
-              key={p.id}
-              className="flex items-center gap-4 border border-brown/15 p-3"
+          ) : (
+            <form
+              onSubmit={handleSubmit}
+              className="mb-8 flex flex-col gap-3 border border-brown/15 p-6"
             >
-              <div className="relative h-16 w-14 flex-shrink-0 overflow-hidden bg-tan">
-                <Image
-                  src={p.image_url}
-                  alt={p.name}
-                  fill
-                  sizes="56px"
-                  className="object-cover"
+              <div className="mb-1 flex items-center justify-between">
+                <h2 className="font-display text-lg font-bold text-brown">
+                  {editingId ? "Edit product" : "New product"}
+                </h2>
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="text-[12px] uppercase tracking-wide text-muted hover:text-brown"
+                >
+                  Cancel
+                </button>
+              </div>
+
+              <div>
+                <label className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-muted">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  value={form.name}
+                  onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                  className="w-full border border-brown/20 bg-transparent px-4 py-2.5 text-[14px] text-brown focus:outline-none focus:border-brown"
                 />
               </div>
-              <div className="flex-1">
-                <p className="text-[14px] font-medium text-brown">{p.name}</p>
-                <p className="text-[12px] text-muted">
-                  {p.detail} · {p.price}
-                </p>
-                <p className="text-[11px] uppercase tracking-wide text-rust">
-                  {categoryName(p.category_id)}
-                  {subcategoryName(p.subcategory_id) &&
-                    ` / ${subcategoryName(p.subcategory_id)}`}
-                </p>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-muted">
+                    Detail
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Washed cotton · Mocha"
+                    value={form.detail}
+                    onChange={(e) => setForm((f) => ({ ...f, detail: e.target.value }))}
+                    className="w-full border border-brown/20 bg-transparent px-4 py-2.5 text-[14px] text-brown focus:outline-none focus:border-brown"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-muted">
+                    Price
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="PKR 2,500"
+                    value={form.price}
+                    onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
+                    className="w-full border border-brown/20 bg-transparent px-4 py-2.5 text-[14px] text-brown focus:outline-none focus:border-brown"
+                  />
+                </div>
               </div>
+
+              <div>
+                <label className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-muted">
+                  Badge (optional)
+                </label>
+                <input
+                  type="text"
+                  placeholder="New or Ltd."
+                  value={form.badge}
+                  onChange={(e) => setForm((f) => ({ ...f, badge: e.target.value }))}
+                  className="w-full border border-brown/20 bg-transparent px-4 py-2.5 text-[14px] text-brown focus:outline-none focus:border-brown"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-muted">
+                  Which section does this belong in?
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <select
+                    value={form.categoryId}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, categoryId: e.target.value, subcategoryId: "" }))
+                    }
+                    className="border border-brown/20 bg-transparent px-3 py-2.5 text-[13px] text-brown focus:outline-none"
+                  >
+                    <option value="">No section</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+
+                  <select
+                    value={form.subcategoryId}
+                    onChange={(e) => setForm((f) => ({ ...f, subcategoryId: e.target.value }))}
+                    disabled={!form.categoryId}
+                    className="border border-brown/20 bg-transparent px-3 py-2.5 text-[13px] text-brown focus:outline-none disabled:opacity-40"
+                  >
+                    <option value="">No subsection</option>
+                    {relevantSubcategories.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {categories.length === 0 && (
+                  <p className="mt-1.5 text-[12px] text-muted">
+                    No sections yet — create one under the &quot;Sections&quot; tab first if you want to organize products.
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-muted">
+                  Photo
+                </label>
+                <input type="file" accept="image/*" onChange={handleImageUpload} />
+                {uploading && (
+                  <span className="ml-2 text-[12px] text-muted">Uploading...</span>
+                )}
+              </div>
+
+              {form.imageUrl && (
+                <div className="relative h-32 w-24 overflow-hidden bg-tan">
+                  <Image
+                    src={form.imageUrl}
+                    alt="Preview"
+                    fill
+                    sizes="96px"
+                    className="object-cover"
+                  />
+                </div>
+              )}
+
+              {formError && <p className="text-[13px] text-red-500">{formError}</p>}
+
               <button
-                type="button"
-                onClick={() => startEdit(p)}
-                className="text-[12px] uppercase tracking-[0.1em] text-muted hover:text-brown"
+                type="submit"
+                className="mt-2 bg-rust px-6 py-2.5 text-[13px] font-medium uppercase tracking-[0.1em] text-cream hover:bg-[#7a3418]"
               >
-                Edit
+                {editingId ? "Save changes" : "Add product"}
               </button>
-              <button
-                type="button"
-                onClick={() => handleDelete(p.id)}
-                className="text-[12px] uppercase tracking-[0.1em] text-red-500 hover:text-red-700"
-              >
-                Delete
-              </button>
+            </form>
+          )}
+
+          {loading ? (
+            <p className="text-[14px] text-muted">Loading...</p>
+          ) : products.length === 0 ? (
+            <p className="text-[14px] text-muted">
+              No products yet — add your first one above.
+            </p>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {products.map((p) => (
+                <div
+                  key={p.id}
+                  className="flex items-center gap-4 border border-brown/15 p-3"
+                >
+                  <div className="relative h-16 w-14 flex-shrink-0 overflow-hidden bg-tan">
+                    <Image
+                      src={p.image_url}
+                      alt={p.name}
+                      fill
+                      sizes="56px"
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-[14px] font-medium text-brown">{p.name}</p>
+                    <p className="text-[12px] text-muted">
+                      {p.detail} · {p.price}
+                    </p>
+                    <p className="text-[11px] uppercase tracking-wide text-rust">
+                      {categoryName(p.category_id)}
+                      {subcategoryName(p.subcategory_id) &&
+                        ` / ${subcategoryName(p.subcategory_id)}`}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => startEdit(p)}
+                    className="text-[12px] uppercase tracking-[0.1em] text-muted hover:text-brown"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(p.id)}
+                    className="text-[12px] uppercase tracking-[0.1em] text-red-500 hover:text-red-700"
+                  >
+                    Delete
+                  </button>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          )}
+        </>
+      )}
+
+      {activeTab === "sections" && (
+        <>
+          <p className="mb-6 text-[13px] font-light text-muted">
+            Sections group your products on the shop page (e.g. &quot;Tops&quot;). Subsections are optional finer categories inside a section (e.g. &quot;Cargo&quot; inside &quot;Bottoms&quot;).
+          </p>
+
+          {categories.length === 0 ? (
+            <p className="mb-6 text-[14px] text-muted">
+              No sections yet — add your first one below.
+            </p>
+          ) : (
+            <div className="mb-8 flex flex-col gap-4">
+              {categories.map((cat) => (
+                <div key={cat.id}>
+                  <div className="flex items-center justify-between border border-brown/15 bg-tan/20 px-4 py-3">
+                    <span className="text-[14px] font-medium text-brown">
+                      {cat.name}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteCategory(cat.id)}
+                      className="text-[11px] uppercase tracking-wide text-red-500 hover:text-red-700"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                  <div className="ml-4 mt-2 flex flex-col gap-1.5">
+                    {subcategories
+                      .filter((s) => s.category_id === cat.id)
+                      .map((sub) => (
+                        <div
+                          key={sub.id}
+                          className="flex items-center justify-between border-l-2 border-brown/15 px-3 py-1.5 text-[13px]"
+                        >
+                          <span className="text-muted">↳ {sub.name}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteSubcategory(sub.id)}
+                            className="text-[10px] uppercase tracking-wide text-red-500 hover:text-red-700"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      ))}
+                    {subcategories.filter((s) => s.category_id === cat.id).length === 0 && (
+                      <p className="px-3 text-[12px] text-muted">No subsections</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 gap-6 border-t border-brown/15 pt-6 sm:grid-cols-2">
+            <form onSubmit={handleAddCategory} className="flex flex-col gap-2">
+              <label className="text-[11px] font-medium uppercase tracking-wide text-muted">
+                Add a section
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  placeholder="e.g. Tops"
+                  className="flex-1 border border-brown/20 bg-transparent px-3 py-2 text-[13px] text-brown focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  className="bg-brown px-4 py-2 text-[11px] uppercase tracking-wide text-cream"
+                >
+                  Add
+                </button>
+              </div>
+            </form>
+
+            <form onSubmit={handleAddSubcategory} className="flex flex-col gap-2">
+              <label className="text-[11px] font-medium uppercase tracking-wide text-muted">
+                Add a subsection
+              </label>
+              <div className="flex gap-2">
+                <select
+                  value={newSubcategoryParent}
+                  onChange={(e) => setNewSubcategoryParent(e.target.value)}
+                  className="border border-brown/20 bg-transparent px-2 py-2 text-[13px] text-brown focus:outline-none"
+                >
+                  <option value="">Section...</option>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="text"
+                  value={newSubcategoryName}
+                  onChange={(e) => setNewSubcategoryName(e.target.value)}
+                  placeholder="e.g. Cargo"
+                  className="flex-1 border border-brown/20 bg-transparent px-3 py-2 text-[13px] text-brown focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  className="bg-brown px-4 py-2 text-[11px] uppercase tracking-wide text-cream"
+                >
+                  Add
+                </button>
+              </div>
+            </form>
+          </div>
+        </>
       )}
     </main>
   );
