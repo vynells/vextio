@@ -18,21 +18,23 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { id, name, detail, price, badge, imageUrl } = body;
+  const { id, name, detail, price, badge, imageUrl, categoryId, subcategoryId } = body;
 
   if (!id || !name) {
     return NextResponse.json({ error: "Missing name" }, { status: 400 });
   }
 
   await sql`
-    INSERT INTO products (id, name, detail, price, badge, image_url)
+    INSERT INTO products (id, name, detail, price, badge, image_url, category_id, subcategory_id)
     VALUES (
       ${id},
       ${name},
       ${detail || "—"},
       ${price || "—"},
       ${badge || null},
-      ${imageUrl || "https://placehold.co/400x500/1C1917/9B9188?text=No+image"}
+      ${imageUrl || "https://placehold.co/400x500/1C1917/9B9188?text=No+image"},
+      ${categoryId || null},
+      ${subcategoryId || null}
     )
   `;
 

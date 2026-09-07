@@ -16,15 +16,10 @@ export async function PUT(
   }
 
   const { id } = await params;
-  const body = await req.json();
-  const { name, detail, price, badge, imageUrl, categoryId, subcategoryId } = body;
+  const { name, sortOrder } = await req.json();
 
   await sql`
-    UPDATE products
-    SET name = ${name}, detail = ${detail}, price = ${price},
-        badge = ${badge || null}, image_url = ${imageUrl},
-        category_id = ${categoryId || null},
-        subcategory_id = ${subcategoryId || null}
+    UPDATE subcategories SET name = ${name}, sort_order = ${sortOrder || 0}
     WHERE id = ${id}
   `;
 
@@ -40,7 +35,7 @@ export async function DELETE(
   }
 
   const { id } = await params;
-  await sql`DELETE FROM products WHERE id = ${id}`;
+  await sql`DELETE FROM subcategories WHERE id = ${id}`;
 
   return NextResponse.json({ success: true });
 }

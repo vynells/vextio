@@ -11,14 +11,32 @@ type Product = {
   price: string;
   badge: string | null;
   image_url: string;
+  category_id: string | null;
+  subcategory_id: string | null;
+};
+
+type Category = { id: string; name: string; sort_order: number };
+type Subcategory = {
+  id: string;
+  category_id: string;
+  name: string;
+  sort_order: number;
 };
 
 export default function AdminPage() {
-  const { isAdmin, token, login: loginToEditMode, logout: logoutFromEditMode } = useEditMode();
+  const {
+    isAdmin,
+    token,
+    login: loginToEditMode,
+    logout: logoutFromEditMode,
+  } = useEditMode();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
+
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [loading, setLoading] = useState(false);
 
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -29,20 +47,31 @@ export default function AdminPage() {
     price: "",
     badge: "",
     imageUrl: "",
+    categoryId: "",
+    subcategoryId: "",
   });
   const [uploading, setUploading] = useState(false);
   const [formError, setFormError] = useState("");
 
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [newSubcategoryName, setNewSubcategoryName] = useState("");
+  const [newSubcategoryParent, setNewSubcategoryParent] = useState("");
+
   useEffect(() => {
-    if (token) fetchProducts();
+    if (token) fetchAll();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
-  async function fetchProducts() {
+  async function fetchAll() {
     setLoading(true);
-    const res = await fetch("/api/products");
-    const data = await res.json();
-    setProducts(data);
+    const [pRes, cRes, sRes] = await Promise.all([
+      fetch("/api/products"),
+      fetch("/api/categories"),
+      fetch("/api/subcategories"),
+    ]);
+    setProducts(await pRes.json());
+    setCategories(await cRes.json());
+    setSubcategories(await sRes.json());
     setLoading(false);
   }
 
@@ -62,12 +91,76 @@ export default function AdminPage() {
     loginToEditMode(data.token);
   }
 
-  function handleLogout() {
-    logoutFromEditMode();
+  function slugify(text: string) {
+    return text.toLowerCase().trim().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+  }
+
+  async function handleAddCategory(e: FormEvent) {
+    e.preventDefault();
+    if (!newCategoryName.trim() || !token) return;
+    const id = slugify(newCategoryName);
+    await fetch("/api/categories", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ id, name: newCategoryName.trim(), sortOrder: categories.length }),
+    });
+    setNewCategoryName("");
+    fetchAll();
+  }
+
+  async function handleDeleteCategory(id: string) {
+    if (!confirm("Delete this section? Products inside will become uncategorized.")) return;
+    await fetch(`/api/categories/${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    fetchAll();
+  }
+
+  async function handleAddSubcategory(e: FormEvent) {
+    e.preventDefault();
+    if (!newSubcategoryName.trim() || !newSubcategoryParent || !token) return;
+    const id = `${newSubcategoryParent}-${slugify(newSubcategoryName)}`;
+    await fetch("/api/subcategories", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        id,
+        categoryId: newSubcategoryParent,
+        name: newSubcategoryName.trim(),
+        sortOrder: subcategories.filter((s) => s.category_id === newSubcategoryParent).length,
+      }),
+    });
+    setNewSubcategoryName("");
+    fetchAll();
+  }
+
+  async function handleDeleteSubcategory(id: string) {
+    if (!confirm("Delete this subsection? Products inside will move to the parent section.")) return;
+    await fetch(`/api/subcategories/${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    fetchAll();
   }
 
   function resetForm() {
-    setForm({ id: "", name: "", detail: "", price: "", badge: "", imageUrl: "" });
+    setForm({
+      id: "",
+      name: "",
+      detail: "",
+      price: "",
+      badge: "",
+      imageUrl: "",
+      categoryId: "",
+      subcategoryId: "",
+    });
     setEditingId(null);
     setFormError("");
   }
@@ -81,6 +174,8 @@ export default function AdminPage() {
       price: p.price,
       badge: p.badge || "",
       imageUrl: p.image_url,
+      categoryId: p.category_id || "",
+      subcategoryId: p.subcategory_id || "",
     });
   }
 
@@ -122,6 +217,8 @@ export default function AdminPage() {
       imageUrl:
         form.imageUrl.trim() ||
         "https://placehold.co/400x500/1C1917/9B9188?text=No+image",
+      categoryId: form.categoryId || null,
+      subcategoryId: form.subcategoryId || null,
     };
 
     if (editingId) {
@@ -138,9 +235,7 @@ export default function AdminPage() {
         return;
       }
     } else {
-      const id =
-        form.id.trim() ||
-        form.name.toLowerCase().trim().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+      const id = form.id.trim() || slugify(form.name);
 
       const res = await fetch("/api/products", {
         method: "POST",
@@ -157,7 +252,7 @@ export default function AdminPage() {
     }
 
     resetForm();
-    fetchProducts();
+    fetchAll();
   }
 
   async function handleDelete(id: string) {
@@ -166,10 +261,24 @@ export default function AdminPage() {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     });
-    fetchProducts();
+    fetchAll();
   }
 
-  if (!token) {
+  function categoryName(id: string | null) {
+    if (!id) return "Uncategorized";
+    return categories.find((c) => c.id === id)?.name || id;
+  }
+
+  function subcategoryName(id: string | null) {
+    if (!id) return null;
+    return subcategories.find((s) => s.id === id)?.name || id;
+  }
+
+  const relevantSubcategories = subcategories.filter(
+    (s) => s.category_id === form.categoryId
+  );
+
+  if (!isAdmin) {
     return (
       <main className="mx-auto flex min-h-screen max-w-[380px] flex-col justify-center px-6">
         <h1 className="mb-8 font-display text-2xl font-bold text-brown">
@@ -208,17 +317,119 @@ export default function AdminPage() {
     <main className="mx-auto max-w-[900px] px-6 py-12">
       <div className="mb-8 flex items-center justify-between">
         <h1 className="font-display text-2xl font-bold text-brown">
-          Manage products
+          Manage store
         </h1>
         <button
           type="button"
-          onClick={handleLogout}
+          onClick={logoutFromEditMode}
           className="text-[12px] uppercase tracking-[0.1em] text-muted hover:text-brown"
         >
           Log out
         </button>
       </div>
 
+      {/* Sections management */}
+      <section className="mb-12 border border-brown/15 p-6">
+        <h2 className="mb-4 font-display text-lg font-bold text-brown">
+          Sections
+        </h2>
+
+        <div className="mb-6 flex flex-col gap-3">
+          {categories.map((cat) => (
+            <div key={cat.id}>
+              <div className="flex items-center justify-between border border-brown/10 bg-tan/20 px-4 py-2.5">
+                <span className="text-[14px] font-medium text-brown">
+                  {cat.name}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => handleDeleteCategory(cat.id)}
+                  className="text-[11px] uppercase tracking-wide text-red-500 hover:text-red-700"
+                >
+                  Delete section
+                </button>
+              </div>
+              <div className="ml-4 mt-1.5 flex flex-col gap-1.5">
+                {subcategories
+                  .filter((s) => s.category_id === cat.id)
+                  .map((sub) => (
+                    <div
+                      key={sub.id}
+                      className="flex items-center justify-between border-l-2 border-brown/15 px-3 py-1.5 text-[13px]"
+                    >
+                      <span className="text-muted">{sub.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteSubcategory(sub.id)}
+                        className="text-[10px] uppercase tracking-wide text-red-500 hover:text-red-700"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <form onSubmit={handleAddCategory} className="flex flex-col gap-2">
+            <label className="text-[11px] font-medium uppercase tracking-wide text-muted">
+              New section (e.g. Tops)
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+                placeholder="Section name"
+                className="flex-1 border border-brown/20 bg-transparent px-3 py-2 text-[13px] text-brown focus:outline-none"
+              />
+              <button
+                type="submit"
+                className="bg-brown px-4 py-2 text-[11px] uppercase tracking-wide text-cream"
+              >
+                Add
+              </button>
+            </div>
+          </form>
+
+          <form onSubmit={handleAddSubcategory} className="flex flex-col gap-2">
+            <label className="text-[11px] font-medium uppercase tracking-wide text-muted">
+              New subsection (e.g. Cargo under Bottoms)
+            </label>
+            <div className="flex gap-2">
+              <select
+                value={newSubcategoryParent}
+                onChange={(e) => setNewSubcategoryParent(e.target.value)}
+                className="border border-brown/20 bg-transparent px-2 py-2 text-[13px] text-brown focus:outline-none"
+              >
+                <option value="">Section...</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="text"
+                value={newSubcategoryName}
+                onChange={(e) => setNewSubcategoryName(e.target.value)}
+                placeholder="Subsection name"
+                className="flex-1 border border-brown/20 bg-transparent px-3 py-2 text-[13px] text-brown focus:outline-none"
+              />
+              <button
+                type="submit"
+                className="bg-brown px-4 py-2 text-[11px] uppercase tracking-wide text-cream"
+              >
+                Add
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      {/* Product form */}
       <form
         onSubmit={handleSubmit}
         className="mb-12 flex flex-col gap-3 border border-brown/15 p-6"
@@ -256,6 +467,37 @@ export default function AdminPage() {
           className="border border-brown/20 bg-transparent px-4 py-2.5 text-[14px] text-brown focus:outline-none focus:border-brown"
         />
 
+        <div className="grid grid-cols-2 gap-3">
+          <select
+            value={form.categoryId}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, categoryId: e.target.value, subcategoryId: "" }))
+            }
+            className="border border-brown/20 bg-transparent px-3 py-2.5 text-[13px] text-brown focus:outline-none"
+          >
+            <option value="">No section</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={form.subcategoryId}
+            onChange={(e) => setForm((f) => ({ ...f, subcategoryId: e.target.value }))}
+            disabled={!form.categoryId}
+            className="border border-brown/20 bg-transparent px-3 py-2.5 text-[13px] text-brown focus:outline-none disabled:opacity-40"
+          >
+            <option value="">No subsection</option>
+            {relevantSubcategories.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <div className="flex items-center gap-4">
           <input type="file" accept="image/*" onChange={handleImageUpload} />
           {uploading && (
@@ -275,9 +517,7 @@ export default function AdminPage() {
           </div>
         )}
 
-        {formError && (
-          <p className="text-[13px] text-red-500">{formError}</p>
-        )}
+        {formError && <p className="text-[13px] text-red-500">{formError}</p>}
 
         <div className="mt-2 flex gap-3">
           <button
@@ -324,6 +564,11 @@ export default function AdminPage() {
                 <p className="text-[14px] font-medium text-brown">{p.name}</p>
                 <p className="text-[12px] text-muted">
                   {p.detail} · {p.price}
+                </p>
+                <p className="text-[11px] uppercase tracking-wide text-rust">
+                  {categoryName(p.category_id)}
+                  {subcategoryName(p.subcategory_id) &&
+                    ` / ${subcategoryName(p.subcategory_id)}`}
                 </p>
               </div>
               <button
