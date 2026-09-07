@@ -159,8 +159,7 @@ export default function ProductsPage() {
         ) : (
           <>
             {/* Category nav with hover-to-reveal subsections */}
-            <Reveal delay={150}>
-              <div className="mx-auto mb-4 flex max-w-[900px] flex-wrap justify-center gap-1 border-b border-brown/15 pb-4">
+            <div className="relative z-[70] mx-auto mb-4 flex max-w-[900px] flex-wrap justify-center gap-1 border-b border-brown/15 pb-4">
                 {categories.map((cat) => {
                   const subs = subsOf(cat.id);
                   const hasSubs = subs.length > 0;
@@ -210,7 +209,6 @@ export default function ProductsPage() {
                   );
                 })}
               </div>
-            </Reveal>
 
             {activeLabel && (
               <Reveal delay={200}>
