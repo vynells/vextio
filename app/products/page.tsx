@@ -45,6 +45,24 @@ export default function ProductsPage() {
   const [activeCategory, setActiveCategory] = useState<string>("");
   const [activeSubcategory, setActiveSubcategory] = useState<string>("");
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
+  const closeTimer = useState<{ current: ReturnType<typeof setTimeout> | null }>({
+    current: null,
+  })[0];
+
+  function openMenu(categoryId: string) {
+    if (closeTimer.current) {
+      clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+    }
+    setHoveredCategory(categoryId);
+  }
+
+  function scheduleClose() {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    closeTimer.current = setTimeout(() => {
+      setHoveredCategory(null);
+    }, 1000);
+  }
 
   useEffect(() => {
     Promise.all([
@@ -152,8 +170,8 @@ export default function ProductsPage() {
                     <div
                       key={cat.id}
                       className="relative"
-                      onMouseEnter={() => hasSubs && setHoveredCategory(cat.id)}
-                      onMouseLeave={() => setHoveredCategory(null)}
+                      onMouseEnter={() => hasSubs && openMenu(cat.id)}
+                      onMouseLeave={() => hasSubs && scheduleClose()}
                     >
                       <button
                         type="button"
@@ -169,21 +187,23 @@ export default function ProductsPage() {
                       </button>
 
                       {hasSubs && hoveredCategory === cat.id && (
-                        <div className="absolute left-1/2 top-full z-20 flex -translate-x-1/2 flex-col border border-brown/15 bg-cream py-1 shadow-lg">
-                          {subs.map((sub) => (
-                            <button
-                              key={sub.id}
-                              type="button"
-                              onClick={() => handleSubcategoryClick(cat.id, sub)}
-                              className={`whitespace-nowrap px-6 py-2 text-left text-[13px] transition-colors ${
-                                activeSubcategory === sub.id
-                                  ? "bg-tan text-rust"
-                                  : "text-brown hover:bg-tan/50"
-                              }`}
-                            >
-                              {sub.name}
-                            </button>
-                          ))}
+                        <div className="absolute left-1/2 top-full z-20 -translate-x-1/2 pt-2">
+                          <div className="flex flex-col border border-brown/15 bg-cream py-1 shadow-lg">
+                            {subs.map((sub) => (
+                              <button
+                                key={sub.id}
+                                type="button"
+                                onClick={() => handleSubcategoryClick(cat.id, sub)}
+                                className={`whitespace-nowrap px-6 py-2 text-left text-[13px] transition-colors ${
+                                  activeSubcategory === sub.id
+                                    ? "bg-tan text-rust"
+                                    : "text-brown hover:bg-tan/50"
+                                }`}
+                              >
+                                {sub.name}
+                              </button>
+                            ))}
+                          </div>
                         </div>
                       )}
                     </div>
