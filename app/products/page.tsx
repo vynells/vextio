@@ -187,7 +187,7 @@ export default function ProductsPage() {
                       </button>
 
                       {hasSubs && hoveredCategory === cat.id && (
-                        <div className="absolute left-1/2 top-full z-20 -translate-x-1/2 pt-2">
+                        <div className="absolute left-1/2 top-full z-[70] -translate-x-1/2 pt-2">
                           <div className="flex flex-col border border-brown/15 bg-cream py-1 shadow-lg">
                             {subs.map((sub) => (
                               <button
