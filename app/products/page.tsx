@@ -1,10 +1,10 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import ProductCard, { Product } from "@/components/ProductCard";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import Reveal from "@/components/Reveal";
-import { sql } from "@vercel/postgres";
-
-export const dynamic = "force-dynamic";
 
 type DbProduct = {
   id: string;
@@ -25,20 +25,6 @@ type Subcategory = {
   sort_order: number;
 };
 
-async function getData() {
-  const [productsRes, categoriesRes, subcategoriesRes] = await Promise.all([
-    sql`SELECT * FROM products ORDER BY created_at DESC`,
-    sql`SELECT * FROM categories ORDER BY sort_order, name`,
-    sql`SELECT * FROM subcategories ORDER BY sort_order, name`,
-  ]);
-
-  return {
-    products: productsRes.rows as DbProduct[],
-    categories: categoriesRes.rows as Category[],
-    subcategories: subcategoriesRes.rows as Subcategory[],
-  };
-}
-
 function toProduct(p: DbProduct): Product {
   return {
     id: p.id,
@@ -50,10 +36,61 @@ function toProduct(p: DbProduct): Product {
   };
 }
 
-export default async function ProductsPage() {
-  const { products, categories, subcategories } = await getData();
+export default function ProductsPage() {
+  const [products, setProducts] = useState<DbProduct[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const uncategorized = products.filter((p) => !p.category_id);
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string>("");
+
+  useEffect(() => {
+    Promise.all([
+      fetch("/api/products").then((r) => r.json()),
+      fetch("/api/categories").then((r) => r.json()),
+      fetch("/api/subcategories").then((r) => r.json()),
+    ]).then(([p, c, s]) => {
+      setProducts(p);
+      setCategories(c);
+      setSubcategories(s);
+      if (c.length > 0) setSelectedCategory(c[0].id);
+      setLoading(false);
+    });
+  }, []);
+
+  const subsOfSelected = subcategories.filter(
+    (s) => s.category_id === selectedCategory
+  );
+  const categoryHasSubsections = subsOfSelected.length > 0;
+
+  function handleCategoryChange(categoryId: string) {
+    setSelectedCategory(categoryId);
+    setSelectedSubcategory("");
+  }
+
+  const visibleProducts = (() => {
+    if (!selectedCategory) return [];
+    if (categoryHasSubsections) {
+      if (!selectedSubcategory) return null; // must choose a subsection first
+      return products.filter((p) => p.subcategory_id === selectedSubcategory);
+    }
+    return products.filter(
+      (p) => p.category_id === selectedCategory && !p.subcategory_id
+    );
+  })();
+
+  if (loading) {
+    return (
+      <>
+        <Nav />
+        <main className="bg-off px-6 py-20 text-center md:px-10">
+          <p className="text-[14px] text-muted">Loading...</p>
+        </main>
+        <Footer />
+      </>
+    );
+  }
 
   return (
     <>
@@ -62,94 +99,73 @@ export default async function ProductsPage() {
       <main className="bg-off px-6 py-20 md:px-10">
         <Reveal>
           <p className="mb-3 text-center text-[11px] font-medium uppercase tracking-[0.25em] text-rust">
-            The full collection
+            The collection
           </p>
         </Reveal>
         <Reveal delay={100}>
-          <h1 className="mb-16 text-center font-display text-[2.4rem] font-bold text-brown md:text-[3.2rem]">
-            All pieces
+          <h1 className="mb-10 text-center font-display text-[2.4rem] font-bold text-brown md:text-[3.2rem]">
+            Browse pieces
           </h1>
         </Reveal>
 
-        <div className="mx-auto max-w-[1200px]">
-          {categories.map((cat) => {
-            const subsOfCat = subcategories.filter(
-              (s) => s.category_id === cat.id
-            );
-            const directProducts = products.filter(
-              (p) => p.category_id === cat.id && !p.subcategory_id
-            );
+        {categories.length === 0 ? (
+          <p className="text-center text-[14px] text-muted">
+            No sections available yet.
+          </p>
+        ) : (
+          <>
+            <Reveal delay={150}>
+              <div className="mx-auto mb-10 flex max-w-[500px] flex-col gap-3 sm:flex-row">
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => handleCategoryChange(e.target.value)}
+                  className="flex-1 border border-brown/25 bg-cream px-4 py-3 text-[14px] text-brown focus:outline-none"
+                >
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
 
-            const hasAnything =
-              directProducts.length > 0 ||
-              subsOfCat.some(
-                (s) => products.filter((p) => p.subcategory_id === s.id).length > 0
-              );
-
-            if (!hasAnything) return null;
-
-            return (
-              <div key={cat.id} className="mb-16">
-                <Reveal>
-                  <h2 className="mb-8 font-display text-[1.8rem] font-bold text-brown">
-                    {cat.name}
-                  </h2>
-                </Reveal>
-
-                {directProducts.length > 0 && (
-                  <div className="mb-10 grid grid-cols-2 gap-6 md:grid-cols-4">
-                    {directProducts.map((product, i) => (
-                      <Reveal key={product.id} delay={i * 80}>
-                        <ProductCard product={toProduct(product)} />
-                      </Reveal>
+                {categoryHasSubsections && (
+                  <select
+                    value={selectedSubcategory}
+                    onChange={(e) => setSelectedSubcategory(e.target.value)}
+                    className="flex-1 border border-brown/25 bg-cream px-4 py-3 text-[14px] text-brown focus:outline-none"
+                  >
+                    <option value="">Choose a type...</option>
+                    {subsOfSelected.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name}
+                      </option>
                     ))}
-                  </div>
+                  </select>
                 )}
-
-                {subsOfCat.map((sub) => {
-                  const subProducts = products.filter(
-                    (p) => p.subcategory_id === sub.id
-                  );
-                  if (subProducts.length === 0) return null;
-
-                  return (
-                    <div key={sub.id} className="mb-10">
-                      <Reveal>
-                        <h3 className="mb-5 text-[13px] font-medium uppercase tracking-[0.15em] text-rust">
-                          {sub.name}
-                        </h3>
-                      </Reveal>
-                      <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
-                        {subProducts.map((product, i) => (
-                          <Reveal key={product.id} delay={i * 80}>
-                            <ProductCard product={toProduct(product)} />
-                          </Reveal>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
               </div>
-            );
-          })}
+            </Reveal>
 
-          {uncategorized.length > 0 && (
-            <div className="mb-16">
-              <Reveal>
-                <h2 className="mb-8 font-display text-[1.8rem] font-bold text-brown">
-                  More pieces
-                </h2>
-              </Reveal>
-              <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
-                {uncategorized.map((product, i) => (
-                  <Reveal key={product.id} delay={i * 80}>
-                    <ProductCard product={toProduct(product)} />
-                  </Reveal>
-                ))}
-              </div>
+            <div className="mx-auto max-w-[1200px]">
+              {visibleProducts === null ? (
+                <p className="text-center text-[14px] text-muted">
+                  Choose a type above to see these pieces.
+                </p>
+              ) : visibleProducts.length === 0 ? (
+                <p className="text-center text-[14px] text-muted">
+                  No pieces here yet.
+                </p>
+              ) : (
+                <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
+                  {visibleProducts.map((product, i) => (
+                    <Reveal key={product.id} delay={i * 80}>
+                      <ProductCard product={toProduct(product)} />
+                    </Reveal>
+                  ))}
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </>
+        )}
       </main>
 
       <Footer />
