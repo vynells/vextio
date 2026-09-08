@@ -1,18 +1,21 @@
 import Link from "next/link";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
+import FadeIn from "@/components/FadeIn";
 
 export default function ReturnPolicy() {
   return (
     <>
       <Nav />
       <main className="mx-auto max-w-[720px] px-6 py-20 md:px-10">
-        <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.25em] text-rust">
-          Legal
-        </p>
-        <h1 className="mb-10 font-display text-[2.4rem] font-bold text-brown">
-          Return &amp; Refund Policy
-        </h1>
+        <FadeIn>
+          <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.25em] text-rust">
+            Legal
+          </p>
+          <h1 className="mb-10 font-display text-[2.4rem] font-bold text-brown">
+            Return &amp; Refund Policy
+          </h1>
+        </FadeIn>
 
         <div className="space-y-8 text-[14px] font-light leading-[1.8] text-muted">
           <section>

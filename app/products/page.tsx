@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import ProductCard, { Product } from "@/components/ProductCard";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
+import FadeIn from "@/components/FadeIn";
 import Reveal from "@/components/Reveal";
 
 type DbProduct = {
@@ -141,16 +142,16 @@ export default function ProductsPage() {
       <Nav />
 
       <main className="bg-off px-6 py-20 md:px-10">
-        <Reveal>
+        <FadeIn>
           <p className="mb-3 text-center text-[11px] font-medium uppercase tracking-[0.25em] text-rust">
             The collection
           </p>
-        </Reveal>
-        <Reveal delay={100}>
+        </FadeIn>
+        <FadeIn delay={100}>
           <h1 className="mb-10 text-center font-display text-[2.4rem] font-bold text-brown md:text-[3.2rem]">
             Browse pieces
           </h1>
-        </Reveal>
+        </FadeIn>
 
         {categories.length === 0 ? (
           <p className="text-center text-[14px] text-muted">
