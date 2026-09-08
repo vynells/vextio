@@ -13,7 +13,7 @@ export default function PageTransition({ children }: { children: ReactNode }) {
     const timeout = setTimeout(() => {
       setDisplayChildren(children);
       setVisible(true);
-    }, 200);
+    }, 150);
     return () => clearTimeout(timeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
@@ -22,8 +22,7 @@ export default function PageTransition({ children }: { children: ReactNode }) {
     <div
       style={{
         opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0)" : "translateY(8px)",
-        transition: "opacity 250ms ease, transform 250ms ease",
+        transition: "opacity 300ms ease",
       }}
     >
       {displayChildren}
