@@ -6,6 +6,7 @@ import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import FadeIn from "@/components/FadeIn";
 import Reveal from "@/components/Reveal";
+import VextioLoader from "@/components/VextioLoader";
 
 type DbProduct = {
   id: string;
@@ -129,8 +130,8 @@ export default function ProductsPage() {
     return (
       <>
         <Nav />
-        <main className="bg-off px-6 py-20 text-center md:px-10">
-          <p className="text-[14px] text-muted">Loading...</p>
+        <main className="bg-off px-6 py-20 md:px-10">
+          <VextioLoader />
         </main>
         <Footer />
       </>
