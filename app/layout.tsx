@@ -4,6 +4,7 @@ import "./globals.css";
 import { CartProvider } from "@/components/CartContext";
 import { EditModeProvider } from "@/components/EditModeContext";
 import AdminBar from "@/components/AdminBar";
+import PageTransition from "@/components/PageTransition";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -35,7 +36,7 @@ export default function RootLayout({
       >
         <EditModeProvider>
           <CartProvider>
-            {children}
+            <PageTransition>{children}</PageTransition>
             <AdminBar />
           </CartProvider>
         </EditModeProvider>
