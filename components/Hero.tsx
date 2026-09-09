@@ -4,9 +4,9 @@ import EditableText from "./EditableText";
 
 export default function Hero() {
   return (
-    <section className="relative flex min-h-[88vh] items-center justify-center overflow-hidden bg-cream">
+    <section className="relative flex min-h-screen items-center justify-center overflow-hidden bg-cream px-6">
       <div
-        className="pointer-events-none absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-[0.12] blur-[120px]"
+        className="pointer-events-none absolute left-1/2 top-1/2 h-[700px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-[0.14] blur-[130px]"
         style={{
           background:
             "radial-gradient(circle, rgba(156,184,50,0.5) 0%, rgba(194,59,59,0.3) 45%, transparent 70%)",
@@ -15,8 +15,8 @@ export default function Hero() {
 
       <svg
         viewBox="0 0 200 200"
-        className="pointer-events-none absolute h-[420px] w-[420px] md:h-[560px] md:w-[560px]"
-        style={{ filter: "drop-shadow(0 0 14px rgba(156,184,50,0.15))" }}
+        className="pointer-events-none absolute h-[480px] w-[480px] md:h-[680px] md:w-[680px]"
+        style={{ filter: "drop-shadow(0 0 16px rgba(156,184,50,0.15))" }}
       >
         <path
           d="M100 4
@@ -43,14 +43,24 @@ export default function Hero() {
         </defs>
       </svg>
 
-      <h1
-        className="relative z-10 select-none text-center font-display text-[4rem] uppercase tracking-[0.02em] text-brown md:text-[7.5rem]"
-        style={{
-          textShadow: "0 0 16px rgba(156,184,50,0.15)",
-        }}
-      >
-        <EditableText contentKey="hero_heading" defaultValue="Vextio" as="span" />
-      </h1>
+      <div className="relative z-10 flex flex-col items-center">
+        <h1
+          className="select-none text-center font-display text-[5.5rem] uppercase leading-none tracking-[0.01em] text-brown sm:text-[7.5rem] md:text-[10rem] lg:text-[12rem]"
+          style={{
+            textShadow: "0 0 20px rgba(156,184,50,0.18)",
+          }}
+        >
+          <EditableText contentKey="hero_heading" defaultValue="Vextio" as="span" />
+        </h1>
+
+        <p className="mt-4 text-[11px] font-medium uppercase tracking-[0.35em] text-muted md:text-[13px]">
+          Est. 2024 — Islamabad
+        </p>
+      </div>
+
+      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce text-[10px] uppercase tracking-[0.25em] text-muted">
+        Scroll
+      </div>
     </section>
   );
 }
