@@ -19,7 +19,33 @@ export async function POST(req: NextRequest) {
       items,
     } = body;
 
-    const itemsHtml = items
+    const itemsRowsHtml = items
+      .map(
+        (item: { name: string; price: string; qty: number; imageUrl?: string }) =>
+          `<tr>
+            <td style="padding:12px 0;border-bottom:1px solid #eee;">
+              <table cellpadding="0" cellspacing="0"><tr>
+                ${
+                  item.imageUrl
+                    ? `<td style="width:56px;padding-right:12px;">
+                        <img src="${item.imageUrl}" width="56" height="56" style="object-fit:cover;border-radius:2px;" />
+                      </td>`
+                    : ""
+                }
+                <td>
+                  <div style="font-size:14px;color:#2A2420;">${item.name}</div>
+                  <div style="font-size:12px;color:#8A7B6C;">Qty ${item.qty}</div>
+                </td>
+              </tr></table>
+            </td>
+            <td style="padding:12px 0;border-bottom:1px solid #eee;text-align:right;font-size:14px;color:#2A2420;">
+              ${item.price}
+            </td>
+          </tr>`
+      )
+      .join("");
+
+    const itemsRowsPlain = items
       .map(
         (item: { name: string; price: string; qty: number }) =>
           `<tr>
@@ -30,17 +56,16 @@ export async function POST(req: NextRequest) {
       )
       .join("");
 
+    // --- Email to Vextio (admin) ---
     await resend.emails.send({
-      from: "Vextio Orders <onboarding@resend.dev>",
-      to: "vynelia4@gmail.com",
+      from: "Vextio Orders <orders@blackoutmc.xyz>",
+      to: ["vynelia4@gmail.com", "mohsin.rasheed2010@gmail.com"],
       subject: `New order from ${firstName} ${lastName}`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px;">
           <h2>New Order Received</h2>
-
           <h3>Contact</h3>
           <p>${contact}</p>
-
           <h3>Delivery</h3>
           <p>
             ${firstName} ${lastName}<br/>
@@ -49,10 +74,8 @@ export async function POST(req: NextRequest) {
             Pakistan<br/>
             Phone: ${phone}
           </p>
-
           <h3>Payment method</h3>
           <p>${paymentMethod}</p>
-
           <h3>Items</h3>
           <table style="border-collapse: collapse; width: 100%;">
             <thead>
@@ -62,13 +85,59 @@ export async function POST(req: NextRequest) {
                 <th style="text-align:left;padding:8px 12px;border-bottom:2px solid #333;">Price</th>
               </tr>
             </thead>
-            <tbody>
-              ${itemsHtml}
-            </tbody>
+            <tbody>${itemsRowsPlain}</tbody>
           </table>
         </div>
       `,
     });
+
+    // --- Email to the customer ---
+    if (contact && contact.includes("@")) {
+      await resend.emails.send({
+        from: "Vextio <orders@blackoutmc.xyz>",
+        to: contact,
+        subject: "Your Vextio order is confirmed",
+        html: `
+          <div style="font-family: -apple-system, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #2A2420;">
+            <div style="padding: 32px 24px 16px;">
+              <p style="font-size:20px;font-weight:700;letter-spacing:0.05em;margin:0 0 24px;">VEXTIO</p>
+              <p style="font-size:18px;font-weight:600;margin:0 0 8px;">Thank you for your order, ${firstName}!</p>
+              <p style="font-size:14px;color:#8A7B6C;margin:0 0 24px;">
+                We're getting your order ready. You'll pay by Cash on Delivery when it arrives.
+              </p>
+            </div>
+
+            <div style="padding: 0 24px;">
+              <p style="font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:#8A7B6C;margin:0 0 12px;">
+                Order summary
+              </p>
+              <table style="width:100%;border-collapse:collapse;">
+                <tbody>${itemsRowsHtml}</tbody>
+              </table>
+            </div>
+
+            <div style="padding: 24px; margin-top: 8px;">
+              <p style="font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:#8A7B6C;margin:0 0 12px;">
+                Delivery address
+              </p>
+              <p style="font-size:14px;line-height:1.6;margin:0;">
+                ${firstName} ${lastName}<br/>
+                ${address}${apartment ? `, ${apartment}` : ""}<br/>
+                ${city}${postalCode ? `, ${postalCode}` : ""}<br/>
+                Pakistan<br/>
+                ${phone}
+              </p>
+            </div>
+
+            <div style="padding: 0 24px 32px;">
+              <p style="font-size:12px;color:#8A7B6C;margin:0;">
+                Questions about your order? Reply to this email or call us at 03340927688.
+              </p>
+            </div>
+          </div>
+        `,
+      });
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
