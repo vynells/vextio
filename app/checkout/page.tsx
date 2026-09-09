@@ -3,11 +3,18 @@
 import { useState, FormEvent } from "react";
 import Image from "next/image";
 import { useCart } from "@/components/CartContext";
+import { parsePrice, formatPKR } from "@/lib/price";
 
 type PaymentMethod = "cod" | "card" | "bank" | "easypaisa";
 
 export default function CheckoutPage() {
   const { items, removeItem } = useCart();
+
+  const subtotal = items.reduce(
+    (sum, item) => sum + parsePrice(item.price) * item.qty,
+    0
+  );
+  const shipping = items.length > 0 ? 300 : 0;
 
   const [contact, setContact] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -267,7 +274,7 @@ export default function CheckoutPage() {
                   </p>
                 </div>
                 <p className="text-[13px] font-bold text-brown">
-                  {item.price}
+                  {formatPKR(parsePrice(item.price) * item.qty)}
                 </p>
                 <button
                   type="button"
@@ -279,6 +286,21 @@ export default function CheckoutPage() {
                 </button>
               </div>
             ))}
+
+            <div className="flex flex-col gap-2 border-t border-brown/15 pt-4 text-[13px]">
+              <div className="flex justify-between text-muted">
+                <span>Subtotal</span>
+                <span>{formatPKR(subtotal)}</span>
+              </div>
+              <div className="flex justify-between text-muted">
+                <span>Shipping</span>
+                <span>{shipping === 0 ? "Free" : formatPKR(shipping)}</span>
+              </div>
+              <div className="flex justify-between border-t border-brown/15 pt-2 text-[15px] font-bold text-brown">
+                <span>Total</span>
+                <span>{formatPKR(subtotal + shipping)}</span>
+              </div>
+            </div>
           </div>
         )}
       </aside>

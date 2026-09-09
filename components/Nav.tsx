@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "./CartContext";
+import { parsePrice, formatPKR } from "@/lib/price";
 
 const links = [
   { label: "Shop", href: "/products" },
@@ -155,7 +156,7 @@ export default function Nav() {
                       </button>
                     </div>
                     <p className="text-[13px] font-bold text-brown">
-                      {item.price}
+                      {formatPKR(parsePrice(item.price) * item.qty)}
                     </p>
                   </div>
                   <button
@@ -168,6 +169,20 @@ export default function Nav() {
                   </button>
                 </div>
               ))}
+            </div>
+          )}
+
+          {items.length > 0 && (
+            <div className="mt-4 flex items-center justify-between border-t border-brown/15 pt-4 text-[14px]">
+              <span className="font-medium text-brown">Total</span>
+              <span className="font-bold text-brown">
+                {formatPKR(
+                  items.reduce(
+                    (sum, item) => sum + parsePrice(item.price) * item.qty,
+                    0
+                  )
+                )}
+              </span>
             </div>
           )}
 
