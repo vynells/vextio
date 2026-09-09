@@ -17,7 +17,8 @@ export default {
         off: "#0D0D0D",
       },
       fontFamily: {
-        display: ["var(--font-playfair)", "Impact", "sans-serif"],
+        display: ["var(--font-playfair)", "Georgia", "serif"],
+        logo: ["var(--font-anton)", "Impact", "sans-serif"],
         body: ["var(--font-dm-sans)", "system-ui", "sans-serif"],
       },
       animation: {

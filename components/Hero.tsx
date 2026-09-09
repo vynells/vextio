@@ -45,21 +45,13 @@ export default function Hero() {
 
       <div className="relative z-10 flex flex-col items-center">
         <h1
-          className="select-none text-center font-display text-[5.5rem] uppercase leading-none tracking-[0.01em] text-brown sm:text-[7.5rem] md:text-[10rem] lg:text-[12rem]"
+          className="select-none text-center font-logo text-[5.5rem] uppercase leading-none tracking-[0.01em] text-brown sm:text-[7.5rem] md:text-[10rem] lg:text-[12rem]"
           style={{
             textShadow: "0 0 20px rgba(156,184,50,0.18)",
           }}
         >
           <EditableText contentKey="hero_heading" defaultValue="Vextio" as="span" />
         </h1>
-
-        <p className="mt-4 text-[11px] font-medium uppercase tracking-[0.35em] text-muted md:text-[13px]">
-          Est. 2024 — Islamabad
-        </p>
-      </div>
-
-      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce text-[10px] uppercase tracking-[0.25em] text-muted">
-        Scroll
       </div>
     </section>
   );
