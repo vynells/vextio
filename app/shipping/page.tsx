@@ -12,14 +12,14 @@ export default function ShippingPolicy() {
           <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.25em] text-rust">
             Legal
           </p>
-          <h1 className="mb-10 font-display text-[2.4rem] font-bold text-brown">
+          <h1 className="mb-10 font-legal text-[2.4rem] font-bold text-brown">
             Shipping Policy
           </h1>
         </FadeIn>
 
         <div className="space-y-8 text-[14px] font-light leading-[1.8] text-muted">
           <section>
-            <h2 className="mb-2 font-display text-lg font-bold text-brown">
+            <h2 className="mb-2 font-legal text-lg font-bold text-brown">
               Delivery areas
             </h2>
             <p>
@@ -29,7 +29,7 @@ export default function ShippingPolicy() {
           </section>
 
           <section>
-            <h2 className="mb-2 font-display text-lg font-bold text-brown">
+            <h2 className="mb-2 font-legal text-lg font-bold text-brown">
               Processing time
             </h2>
             <p>
@@ -39,7 +39,7 @@ export default function ShippingPolicy() {
           </section>
 
           <section>
-            <h2 className="mb-2 font-display text-lg font-bold text-brown">
+            <h2 className="mb-2 font-legal text-lg font-bold text-brown">
               Delivery time
             </h2>
             <p>
@@ -50,7 +50,7 @@ export default function ShippingPolicy() {
           </section>
 
           <section>
-            <h2 className="mb-2 font-display text-lg font-bold text-brown">
+            <h2 className="mb-2 font-legal text-lg font-bold text-brown">
               Shipping charges
             </h2>
             <p>
@@ -60,7 +60,7 @@ export default function ShippingPolicy() {
           </section>
 
           <section>
-            <h2 className="mb-2 font-display text-lg font-bold text-brown">
+            <h2 className="mb-2 font-legal text-lg font-bold text-brown">
               Order tracking
             </h2>
             <p>

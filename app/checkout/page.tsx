@@ -68,7 +68,7 @@ export default function CheckoutPage() {
         <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.25em] text-rust">
           Order confirmed
         </p>
-        <h1 className="mb-4 font-display text-[2rem] font-bold text-brown">
+        <h1 className="mb-4 font-legal text-[2rem] font-bold text-brown">
           Thanks, {firstName}.
         </h1>
         <p className="text-[14px] font-light leading-relaxed text-muted">
@@ -84,7 +84,7 @@ export default function CheckoutPage() {
       <form onSubmit={handleSubmit} className="flex flex-col gap-10">
         {/* Contact */}
         <section>
-          <h2 className="mb-4 font-display text-lg font-bold text-brown">
+          <h2 className="mb-4 font-legal text-lg font-bold text-brown">
             Contact
           </h2>
           <input
@@ -99,7 +99,7 @@ export default function CheckoutPage() {
 
         {/* Delivery */}
         <section>
-          <h2 className="mb-4 font-display text-lg font-bold text-brown">
+          <h2 className="mb-4 font-legal text-lg font-bold text-brown">
             Delivery
           </h2>
           <div className="flex flex-col gap-3">
@@ -184,7 +184,7 @@ export default function CheckoutPage() {
 
         {/* Payment */}
         <section>
-          <h2 className="mb-4 font-display text-lg font-bold text-brown">
+          <h2 className="mb-4 font-legal text-lg font-bold text-brown">
             Payment
           </h2>
           <p className="mb-4 text-[12px] font-light text-muted">
@@ -237,7 +237,7 @@ export default function CheckoutPage() {
 
       {/* Order summary */}
       <aside className="h-fit border border-brown/15 bg-tan/20 p-6">
-        <h3 className="mb-5 font-display text-base font-bold text-brown">
+        <h3 className="mb-5 font-legal text-base font-bold text-brown">
           Order summary
         </h3>
 

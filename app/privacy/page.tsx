@@ -12,7 +12,7 @@ export default function PrivacyPolicy() {
           <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.25em] text-rust">
             Legal
           </p>
-          <h1 className="mb-10 font-display text-[2.4rem] font-bold text-brown">
+          <h1 className="mb-10 font-legal text-[2.4rem] font-bold text-brown">
             Privacy Policy
           </h1>
         </FadeIn>
@@ -25,7 +25,7 @@ export default function PrivacyPolicy() {
           </p>
 
           <section>
-            <h2 className="mb-2 font-display text-lg font-bold text-brown">
+            <h2 className="mb-2 font-legal text-lg font-bold text-brown">
               Information we collect
             </h2>
             <p>
@@ -38,7 +38,7 @@ export default function PrivacyPolicy() {
           </section>
 
           <section>
-            <h2 className="mb-2 font-display text-lg font-bold text-brown">
+            <h2 className="mb-2 font-legal text-lg font-bold text-brown">
               How we use your information
             </h2>
             <p>
@@ -50,7 +50,7 @@ export default function PrivacyPolicy() {
           </section>
 
           <section>
-            <h2 className="mb-2 font-display text-lg font-bold text-brown">
+            <h2 className="mb-2 font-legal text-lg font-bold text-brown">
               Data sharing
             </h2>
             <p>
@@ -62,7 +62,7 @@ export default function PrivacyPolicy() {
           </section>
 
           <section>
-            <h2 className="mb-2 font-display text-lg font-bold text-brown">
+            <h2 className="mb-2 font-legal text-lg font-bold text-brown">
               Contact us
             </h2>
             <p>

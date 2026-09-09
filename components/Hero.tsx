@@ -45,7 +45,7 @@ export default function Hero() {
 
       <div className="relative z-10 flex flex-col items-center">
         <h1
-          className="select-none text-center font-logo text-[5.5rem] uppercase leading-none tracking-[0.01em] text-brown sm:text-[7.5rem] md:text-[10rem] lg:text-[12rem]"
+          className="select-none text-center font-display text-[5.5rem] uppercase leading-none tracking-[0.01em] text-brown sm:text-[7.5rem] md:text-[10rem] lg:text-[12rem]"
           style={{
             textShadow: "0 0 20px rgba(156,184,50,0.18)",
           }}

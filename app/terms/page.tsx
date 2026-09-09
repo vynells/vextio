@@ -12,14 +12,14 @@ export default function Terms() {
           <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.25em] text-rust">
             Legal
           </p>
-          <h1 className="mb-10 font-display text-[2.4rem] font-bold text-brown">
+          <h1 className="mb-10 font-legal text-[2.4rem] font-bold text-brown">
             Terms &amp; Conditions
           </h1>
         </FadeIn>
 
         <div className="space-y-8 text-[14px] font-light leading-[1.8] text-muted">
           <section>
-            <h2 className="mb-2 font-display text-lg font-bold text-brown">
+            <h2 className="mb-2 font-legal text-lg font-bold text-brown">
               General
             </h2>
             <p>
@@ -30,7 +30,7 @@ export default function Terms() {
           </section>
 
           <section>
-            <h2 className="mb-2 font-display text-lg font-bold text-brown">
+            <h2 className="mb-2 font-legal text-lg font-bold text-brown">
               Orders and payment
             </h2>
             <p>
@@ -43,7 +43,7 @@ export default function Terms() {
           </section>
 
           <section>
-            <h2 className="mb-2 font-display text-lg font-bold text-brown">
+            <h2 className="mb-2 font-legal text-lg font-bold text-brown">
               Product information
             </h2>
             <p>
@@ -54,7 +54,7 @@ export default function Terms() {
           </section>
 
           <section>
-            <h2 className="mb-2 font-display text-lg font-bold text-brown">
+            <h2 className="mb-2 font-legal text-lg font-bold text-brown">
               Returns
             </h2>
             <p>
@@ -67,7 +67,7 @@ export default function Terms() {
           </section>
 
           <section>
-            <h2 className="mb-2 font-display text-lg font-bold text-brown">
+            <h2 className="mb-2 font-legal text-lg font-bold text-brown">
               Limitation of liability
             </h2>
             <p>
@@ -78,7 +78,7 @@ export default function Terms() {
           </section>
 
           <section>
-            <h2 className="mb-2 font-display text-lg font-bold text-brown">
+            <h2 className="mb-2 font-legal text-lg font-bold text-brown">
               Contact
             </h2>
             <p>

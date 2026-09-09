@@ -66,7 +66,7 @@ export default function ProductCard({ product }: { product: Product }) {
       <p className="mb-1 text-[13px] font-light text-muted">
         {product.detail}
       </p>
-      <p className="font-display text-base font-bold text-brown">
+      <p className="font-legal text-base font-bold text-brown">
         {product.price}
       </p>
     </div>
