@@ -12,7 +12,7 @@ const links = [
 ];
 
 export default function Nav() {
-  const { items, count, isOpen, openCart, closeCart, removeItem } = useCart();
+  const { items, count, isOpen, openCart, closeCart, removeItem, updateQty } = useCart();
   const [open, setOpen] = useState(false);
   const [logoText, setLogoText] = useState("Vextio");
 
@@ -133,9 +133,27 @@ export default function Nav() {
                     <p className="text-[13px] font-medium text-brown">
                       {item.name}
                     </p>
-                    <p className="text-[12px] font-light text-muted">
-                      Qty {item.qty}
-                    </p>
+                    <div className="my-1.5 flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => updateQty(item.id, item.qty - 1)}
+                        aria-label={`Decrease quantity of ${item.name}`}
+                        className="flex h-6 w-6 items-center justify-center border border-brown/25 text-[13px] leading-none text-brown hover:bg-brown/10"
+                      >
+                        −
+                      </button>
+                      <span className="min-w-[16px] text-center text-[12px] text-brown">
+                        {item.qty}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => updateQty(item.id, item.qty + 1)}
+                        aria-label={`Increase quantity of ${item.name}`}
+                        className="flex h-6 w-6 items-center justify-center border border-brown/25 text-[13px] leading-none text-brown hover:bg-brown/10"
+                      >
+                        +
+                      </button>
+                    </div>
                     <p className="text-[13px] font-bold text-brown">
                       {item.price}
                     </p>
