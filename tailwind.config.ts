@@ -8,13 +8,13 @@ export default {
   theme: {
     extend: {
       colors: {
-        cream: "#0B0A09",
-        tan: "#1C1917",
-        brown: "#F2ECE3",
-        rust: "#C1553A",
-        gold: "#D9A64E",
-        muted: "#9B9188",
-        off: "#111010",
+        cream: "#050505",
+        tan: "#141414",
+        brown: "#F0EEE9",
+        rust: "#FF3D3D",
+        gold: "#C4FF00",
+        muted: "#8A8A8A",
+        off: "#0A0A0A",
       },
       fontFamily: {
         display: ["var(--font-playfair)", "Georgia", "serif"],
