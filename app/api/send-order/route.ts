@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
+import { parsePrice, formatPKR } from "@/lib/price";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -18,6 +19,14 @@ export async function POST(req: NextRequest) {
       paymentMethod,
       items,
     } = body;
+
+    const subtotal = items.reduce(
+      (sum: number, item: { price: string; qty: number }) =>
+        sum + parsePrice(item.price) * item.qty,
+      0
+    );
+    const shipping = items.length > 0 ? 300 : 0;
+    const total = subtotal + shipping;
 
     const itemsRowsHtml = items
       .map(
@@ -39,7 +48,7 @@ export async function POST(req: NextRequest) {
               </tr></table>
             </td>
             <td style="padding:12px 0;border-bottom:1px solid #eee;text-align:right;font-size:14px;color:#2A2420;">
-              ${item.price}
+              ${formatPKR(parsePrice(item.price) * item.qty)}
             </td>
           </tr>`
       )
@@ -51,7 +60,7 @@ export async function POST(req: NextRequest) {
           `<tr>
             <td style="padding:8px 12px;border-bottom:1px solid #eee;">${item.name}</td>
             <td style="padding:8px 12px;border-bottom:1px solid #eee;">${item.qty}</td>
-            <td style="padding:8px 12px;border-bottom:1px solid #eee;">${item.price}</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #eee;">${formatPKR(parsePrice(item.price) * item.qty)}</td>
           </tr>`
       )
       .join("");
@@ -87,6 +96,11 @@ export async function POST(req: NextRequest) {
             </thead>
             <tbody>${itemsRowsPlain}</tbody>
           </table>
+          <table style="width:100%;margin-top:8px;">
+            <tr><td style="padding:4px 12px;color:#555;">Subtotal</td><td style="text-align:right;padding:4px 12px;">${formatPKR(subtotal)}</td></tr>
+            <tr><td style="padding:4px 12px;color:#555;">Shipping</td><td style="text-align:right;padding:4px 12px;">${formatPKR(shipping)}</td></tr>
+            <tr><td style="padding:4px 12px;font-weight:bold;border-top:1px solid #333;">Total</td><td style="text-align:right;padding:4px 12px;font-weight:bold;border-top:1px solid #333;">${formatPKR(total)}</td></tr>
+          </table>
         </div>
       `,
     });
@@ -113,6 +127,11 @@ export async function POST(req: NextRequest) {
               </p>
               <table style="width:100%;border-collapse:collapse;">
                 <tbody>${itemsRowsHtml}</tbody>
+              </table>
+              <table style="width:100%;margin-top:12px;">
+                <tr><td style="padding:4px 0;color:#8A7B6C;font-size:13px;">Subtotal</td><td style="text-align:right;padding:4px 0;font-size:13px;">${formatPKR(subtotal)}</td></tr>
+                <tr><td style="padding:4px 0;color:#8A7B6C;font-size:13px;">Shipping</td><td style="text-align:right;padding:4px 0;font-size:13px;">${formatPKR(shipping)}</td></tr>
+                <tr><td style="padding:8px 0;font-weight:bold;border-top:1px solid #eee;">Total</td><td style="text-align:right;padding:8px 0;font-weight:bold;border-top:1px solid #eee;">${formatPKR(total)}</td></tr>
               </table>
             </div>
 
