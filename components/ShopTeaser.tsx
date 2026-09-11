@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import Reveal from "./Reveal";
 import EditableText from "./EditableText";
 
@@ -33,7 +34,7 @@ export default function ShopTeaser() {
               multiline
               className="mb-8 text-[15px] font-light leading-relaxed text-muted"
             />
-            <a
+            <Link
               href="/products"
               className="inline-block border-2 border-brown px-10 py-4 text-[13px] font-medium uppercase tracking-[0.15em] text-brown transition-colors hover:bg-brown hover:text-cream"
             >
@@ -42,7 +43,7 @@ export default function ShopTeaser() {
                 defaultValue="View all products"
                 as="span"
               />
-            </a>
+            </Link>
           </div>
         </Reveal>
       </div>
