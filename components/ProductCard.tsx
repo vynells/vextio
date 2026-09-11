@@ -11,11 +11,16 @@ export type Product = {
   price: string;
   badge?: string;
   imageUrl: string;
+  backImageUrl?: string;
+  extraImageUrls?: string[];
 };
 
 export default function ProductCard({ product }: { product: Product }) {
   const { addItem } = useCart();
   const [added, setAdded] = useState(false);
+  const [hovered, setHovered] = useState(false);
+
+  const hasBack = Boolean(product.backImageUrl);
 
   function handleAdd() {
     addItem({
@@ -29,15 +34,33 @@ export default function ProductCard({ product }: { product: Product }) {
   }
 
   return (
-    <div className="group cursor-pointer">
+    <div
+      className="group cursor-pointer"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
       <div className="relative mb-4 flex aspect-[3/4] items-center justify-center overflow-hidden bg-tan">
+        {/* Front image */}
         <Image
           src={product.imageUrl}
           alt={product.name}
           fill
           sizes="(max-width: 768px) 50vw, 25vw"
-          className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+          className="object-cover transition-[opacity,transform] duration-700 ease-out group-hover:scale-[1.04]"
+          style={{ opacity: hasBack && hovered ? 0 : 1 }}
         />
+
+        {/* Back image — crossfades in smoothly on hover */}
+        {hasBack && (
+          <Image
+            src={product.backImageUrl as string}
+            alt={`${product.name} — back`}
+            fill
+            sizes="(max-width: 768px) 50vw, 25vw"
+            className="object-cover transition-[opacity,transform] duration-700 ease-out scale-[1.04]"
+            style={{ opacity: hovered ? 1 : 0 }}
+          />
+        )}
 
         {product.badge && (
           <span

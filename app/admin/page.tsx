@@ -11,6 +11,8 @@ type Product = {
   price: string;
   badge: string | null;
   image_url: string;
+  back_image_url: string | null;
+  extra_image_urls: string[] | null;
   category_id: string | null;
   subcategory_id: string | null;
 };
@@ -50,10 +52,14 @@ export default function AdminPage() {
     price: "",
     badge: "",
     imageUrl: "",
+    backImageUrl: "",
+    extraImageUrls: [] as string[],
     categoryId: "",
     subcategoryId: "",
   });
   const [uploading, setUploading] = useState(false);
+  const [uploadingBack, setUploadingBack] = useState(false);
+  const [uploadingExtra, setUploadingExtra] = useState(false);
   const [formError, setFormError] = useState("");
 
   const [newCategoryName, setNewCategoryName] = useState("");
@@ -161,6 +167,8 @@ export default function AdminPage() {
       price: "",
       badge: "",
       imageUrl: "",
+      backImageUrl: "",
+      extraImageUrls: [],
       categoryId: "",
       subcategoryId: "",
     });
@@ -178,6 +186,8 @@ export default function AdminPage() {
       price: p.price,
       badge: p.badge || "",
       imageUrl: p.image_url,
+      backImageUrl: p.back_image_url || "",
+      extraImageUrls: p.extra_image_urls || [],
       categoryId: p.category_id || "",
       subcategoryId: p.subcategory_id || "",
     });
@@ -205,6 +215,56 @@ export default function AdminPage() {
     setUploading(false);
   }
 
+  async function handleBackImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !token) return;
+
+    setUploadingBack(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      setForm((f) => ({ ...f, backImageUrl: data.url }));
+    }
+    setUploadingBack(false);
+  }
+
+  async function handleExtraImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !token) return;
+
+    setUploadingExtra(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      setForm((f) => ({ ...f, extraImageUrls: [...f.extraImageUrls, data.url] }));
+    }
+    setUploadingExtra(false);
+    e.target.value = "";
+  }
+
+  function removeExtraImage(url: string) {
+    setForm((f) => ({
+      ...f,
+      extraImageUrls: f.extraImageUrls.filter((u) => u !== url),
+    }));
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setFormError("");
@@ -222,6 +282,8 @@ export default function AdminPage() {
       imageUrl:
         form.imageUrl.trim() ||
         "https://placehold.co/400x500/1C1917/9B9188?text=No+image",
+      backImageUrl: form.backImageUrl.trim() || null,
+      extraImageUrls: form.extraImageUrls,
       categoryId: form.categoryId || null,
       subcategoryId: form.subcategoryId || null,
     };
@@ -480,7 +542,7 @@ export default function AdminPage() {
 
               <div>
                 <label className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-muted">
-                  Photo
+                  Front photo (shown by default)
                 </label>
                 <input type="file" accept="image/*" onChange={handleImageUpload} />
                 {uploading && (
@@ -492,11 +554,73 @@ export default function AdminPage() {
                 <div className="relative h-32 w-24 overflow-hidden bg-tan">
                   <Image
                     src={form.imageUrl}
-                    alt="Preview"
+                    alt="Front preview"
                     fill
                     sizes="96px"
                     className="object-cover"
                   />
+                </div>
+              )}
+
+              <div>
+                <label className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-muted">
+                  Back photo (optional — shows on hover)
+                </label>
+                <input type="file" accept="image/*" onChange={handleBackImageUpload} />
+                {uploadingBack && (
+                  <span className="ml-2 text-[12px] text-muted">Uploading...</span>
+                )}
+              </div>
+
+              {form.backImageUrl && (
+                <div className="relative h-32 w-24 overflow-hidden bg-tan">
+                  <Image
+                    src={form.backImageUrl}
+                    alt="Back preview"
+                    fill
+                    sizes="96px"
+                    className="object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setForm((f) => ({ ...f, backImageUrl: "" }))}
+                    className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center bg-brown/80 text-[11px] text-cream"
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
+
+              <div>
+                <label className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-muted">
+                  More photos (optional)
+                </label>
+                <input type="file" accept="image/*" onChange={handleExtraImageUpload} />
+                {uploadingExtra && (
+                  <span className="ml-2 text-[12px] text-muted">Uploading...</span>
+                )}
+              </div>
+
+              {form.extraImageUrls.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {form.extraImageUrls.map((url) => (
+                    <div key={url} className="relative h-24 w-20 overflow-hidden bg-tan">
+                      <Image
+                        src={url}
+                        alt="Extra preview"
+                        fill
+                        sizes="80px"
+                        className="object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeExtraImage(url)}
+                        className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center bg-brown/80 text-[11px] text-cream"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
                 </div>
               )}
 

@@ -15,6 +15,8 @@ type DbProduct = {
   price: string;
   badge: string | null;
   image_url: string;
+  back_image_url: string | null;
+  extra_image_urls: string[] | null;
   category_id: string | null;
   subcategory_id: string | null;
 };
@@ -35,6 +37,8 @@ function toProduct(p: DbProduct): Product {
     price: p.price,
     badge: p.badge || undefined,
     imageUrl: p.image_url,
+    backImageUrl: p.back_image_url || undefined,
+    extraImageUrls: p.extra_image_urls || undefined,
   };
 }
 

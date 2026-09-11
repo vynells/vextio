@@ -17,12 +17,24 @@ export async function PUT(
 
   const { id } = await params;
   const body = await req.json();
-  const { name, detail, price, badge, imageUrl, categoryId, subcategoryId } = body;
+  const {
+    name,
+    detail,
+    price,
+    badge,
+    imageUrl,
+    backImageUrl,
+    extraImageUrls,
+    categoryId,
+    subcategoryId,
+  } = body;
 
   await sql`
     UPDATE products
     SET name = ${name}, detail = ${detail}, price = ${price},
         badge = ${badge || null}, image_url = ${imageUrl},
+        back_image_url = ${backImageUrl || null},
+        extra_image_urls = ${Array.isArray(extraImageUrls) && extraImageUrls.length > 0 ? extraImageUrls : []},
         category_id = ${categoryId || null},
         subcategory_id = ${subcategoryId || null}
     WHERE id = ${id}
