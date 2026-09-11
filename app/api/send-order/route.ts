@@ -4,6 +4,15 @@ import { parsePrice, formatPKR } from "@/lib/price";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+function generateOrderNumber(): string {
+  const datePart = new Date()
+    .toISOString()
+    .slice(2, 10)
+    .replace(/-/g, ""); // YYMMDD
+  const randomPart = Math.floor(100000 + Math.random() * 900000).toString(); // 6 random digits
+  return `${datePart}${randomPart}`;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -19,6 +28,8 @@ export async function POST(req: NextRequest) {
       paymentMethod,
       items,
     } = body;
+
+    const orderNumber = generateOrderNumber();
 
     const subtotal = items.reduce(
       (sum: number, item: { price: string; qty: number }) =>
@@ -69,10 +80,11 @@ export async function POST(req: NextRequest) {
     await resend.emails.send({
       from: "Vextio Orders <orders@blackoutmc.xyz>",
       to: ["vynelia4@gmail.com", "mohsin.rasheed2010@gmail.com"],
-      subject: `New order from ${firstName} ${lastName}`,
+      subject: `New order ${orderNumber} from ${firstName} ${lastName}`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px;">
           <h2>New Order Received</h2>
+          <p style="font-size:14px;color:#555;"><strong>Order #:</strong> ${orderNumber}</p>
           <h3>Contact</h3>
           <p>${contact}</p>
           <h3>Delivery</h3>
@@ -110,14 +122,17 @@ export async function POST(req: NextRequest) {
       await resend.emails.send({
         from: "Vextio <orders@blackoutmc.xyz>",
         to: contact,
-        subject: "Your Vextio order is confirmed",
+        subject: `Your Vextio order ${orderNumber} is confirmed`,
         html: `
           <div style="font-family: -apple-system, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #2A2420;">
             <div style="padding: 32px 24px 16px;">
               <p style="font-size:20px;font-weight:700;letter-spacing:0.05em;margin:0 0 24px;">VEXTIO</p>
               <p style="font-size:18px;font-weight:600;margin:0 0 8px;">Thank you for your order, ${firstName}!</p>
-              <p style="font-size:14px;color:#8A7B6C;margin:0 0 24px;">
+              <p style="font-size:14px;color:#8A7B6C;margin:0 0 8px;">
                 We're getting your order ready. You'll pay by Cash on Delivery when it arrives.
+              </p>
+              <p style="font-size:13px;color:#2A2420;background:#F5EFE6;display:inline-block;padding:6px 12px;border-radius:4px;margin:0;">
+                Order #<strong>${orderNumber}</strong>
               </p>
             </div>
 
@@ -158,7 +173,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, orderNumber });
   } catch (error) {
     console.error("Order email error:", error);
     return NextResponse.json(
