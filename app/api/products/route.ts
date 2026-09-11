@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@vercel/postgres";
 
+function toPgTextArray(arr: string[]): string {
+  const escaped = arr.map((v) => `"${v.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`);
+  return `{${escaped.join(",")}}`;
+}
+
 function isAuthorized(req: NextRequest) {
   const auth = req.headers.get("authorization");
   if (!auth || !auth.startsWith("Bearer ")) return false;
@@ -37,6 +42,7 @@ export async function POST(req: NextRequest) {
 
   const extraImages: string[] =
     Array.isArray(extraImageUrls) && extraImageUrls.length > 0 ? extraImageUrls : [];
+  const extraImagesLiteral = toPgTextArray(extraImages);
 
   await sql`
     INSERT INTO products (
@@ -51,7 +57,7 @@ export async function POST(req: NextRequest) {
       ${badge || null},
       ${imageUrl || "https://placehold.co/400x500/1C1917/9B9188?text=No+image"},
       ${backImageUrl || null},
-      ${JSON.stringify(extraImages)}::jsonb,
+      ${extraImagesLiteral}::text[],
       ${categoryId || null},
       ${subcategoryId || null}
     )

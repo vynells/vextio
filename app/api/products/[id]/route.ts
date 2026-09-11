@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@vercel/postgres";
 
+function toPgTextArray(arr: string[]): string {
+  const escaped = arr.map((v) => `"${v.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`);
+  return `{${escaped.join(",")}}`;
+}
+
 function isAuthorized(req: NextRequest) {
   const auth = req.headers.get("authorization");
   if (!auth || !auth.startsWith("Bearer ")) return false;
@@ -31,13 +36,14 @@ export async function PUT(
 
   const extraImages: string[] =
     Array.isArray(extraImageUrls) && extraImageUrls.length > 0 ? extraImageUrls : [];
+  const extraImagesLiteral = toPgTextArray(extraImages);
 
   await sql`
     UPDATE products
     SET name = ${name}, detail = ${detail}, price = ${price},
         badge = ${badge || null}, image_url = ${imageUrl},
         back_image_url = ${backImageUrl || null},
-        extra_image_urls = ${JSON.stringify(extraImages)}::jsonb,
+        extra_image_urls = ${extraImagesLiteral}::text[],
         category_id = ${categoryId || null},
         subcategory_id = ${subcategoryId || null}
     WHERE id = ${id}
