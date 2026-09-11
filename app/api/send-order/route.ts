@@ -5,6 +5,12 @@ import { parsePrice, formatPKR } from "@/lib/price";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+function getSiteUrl(): string {
+  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL;
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return "http://localhost:3000";
+}
+
 function generateOrderNumber(): string {
   const datePart = new Date()
     .toISOString()
@@ -180,6 +186,12 @@ export async function POST(req: NextRequest) {
                 <tr><td style="padding:4px 0;color:#8A7B6C;font-size:13px;">Shipping</td><td style="text-align:right;padding:4px 0;font-size:13px;">${formatPKR(shipping)}</td></tr>
                 <tr><td style="padding:8px 0;font-weight:bold;border-top:1px solid #eee;">Total</td><td style="text-align:right;padding:8px 0;font-weight:bold;border-top:1px solid #eee;">${formatPKR(total)}</td></tr>
               </table>
+            </div>
+
+            <div style="padding: 8px 24px 24px;">
+              <a href="${getSiteUrl()}/track/${orderNumber}" style="display:inline-block;background:#8A3418;color:#F5EFE6;text-decoration:none;padding:12px 28px;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;border-radius:2px;">
+                Track your order
+              </a>
             </div>
 
             <div style="padding: 24px; margin-top: 8px;">
