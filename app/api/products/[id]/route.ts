@@ -29,12 +29,15 @@ export async function PUT(
     subcategoryId,
   } = body;
 
+  const extraImages: string[] =
+    Array.isArray(extraImageUrls) && extraImageUrls.length > 0 ? extraImageUrls : [];
+
   await sql`
     UPDATE products
     SET name = ${name}, detail = ${detail}, price = ${price},
         badge = ${badge || null}, image_url = ${imageUrl},
         back_image_url = ${backImageUrl || null},
-        extra_image_urls = ${Array.isArray(extraImageUrls) && extraImageUrls.length > 0 ? extraImageUrls : []},
+        extra_image_urls = ${JSON.stringify(extraImages)}::jsonb,
         category_id = ${categoryId || null},
         subcategory_id = ${subcategoryId || null}
     WHERE id = ${id}

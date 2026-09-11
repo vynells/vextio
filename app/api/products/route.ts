@@ -35,6 +35,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing name" }, { status: 400 });
   }
 
+  const extraImages: string[] =
+    Array.isArray(extraImageUrls) && extraImageUrls.length > 0 ? extraImageUrls : [];
+
   await sql`
     INSERT INTO products (
       id, name, detail, price, badge, image_url, back_image_url, extra_image_urls,
@@ -48,7 +51,7 @@ export async function POST(req: NextRequest) {
       ${badge || null},
       ${imageUrl || "https://placehold.co/400x500/1C1917/9B9188?text=No+image"},
       ${backImageUrl || null},
-      ${Array.isArray(extraImageUrls) && extraImageUrls.length > 0 ? extraImageUrls : []},
+      ${JSON.stringify(extraImages)}::jsonb,
       ${categoryId || null},
       ${subcategoryId || null}
     )
