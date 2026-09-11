@@ -17,16 +17,25 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { key, value } = await req.json();
+  const { key, value, section } = await req.json();
   if (!key) {
     return NextResponse.json({ error: "Missing key" }, { status: 400 });
   }
 
-  await sql`
-    UPDATE site_content
-    SET value = ${value}, updated_at = NOW()
-    WHERE key = ${key}
-  `;
+  const { rows } = await sql`SELECT key FROM site_content WHERE key = ${key}`;
+
+  if (rows.length > 0) {
+    await sql`
+      UPDATE site_content
+      SET value = ${value}, updated_at = NOW()
+      WHERE key = ${key}
+    `;
+  } else {
+    await sql`
+      INSERT INTO site_content (key, value, section)
+      VALUES (${key}, ${value}, ${section || "general"})
+    `;
+  }
 
   return NextResponse.json({ success: true });
 }

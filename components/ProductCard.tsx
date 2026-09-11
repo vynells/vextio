@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useCart } from "./CartContext";
 
 export type Product = {
@@ -22,7 +23,9 @@ export default function ProductCard({ product }: { product: Product }) {
 
   const hasBack = Boolean(product.backImageUrl);
 
-  function handleAdd() {
+  function handleAdd(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
     addItem({
       id: product.id,
       name: product.name,
@@ -34,8 +37,9 @@ export default function ProductCard({ product }: { product: Product }) {
   }
 
   return (
-    <div
-      className="group cursor-pointer"
+    <Link
+      href={`/products/${product.id}`}
+      className="group block cursor-pointer"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
@@ -92,6 +96,6 @@ export default function ProductCard({ product }: { product: Product }) {
       <p className="font-legal text-base font-bold text-brown">
         {product.price}
       </p>
-    </div>
+    </Link>
   );
 }

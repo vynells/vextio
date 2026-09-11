@@ -32,6 +32,9 @@ export async function POST(req: NextRequest) {
     imageUrl,
     backImageUrl,
     extraImageUrls,
+    description,
+    sizes,
+    sizeChartUrl,
     categoryId,
     subcategoryId,
   } = body;
@@ -43,10 +46,15 @@ export async function POST(req: NextRequest) {
   const extraImages: string[] =
     Array.isArray(extraImageUrls) && extraImageUrls.length > 0 ? extraImageUrls : [];
   const extraImagesLiteral = toPgTextArray(extraImages);
+  const defaultSizes = { S: true, M: true, L: true, XL: true, XXL: true };
+  const sizesJson = JSON.stringify(
+    sizes && typeof sizes === "object" ? sizes : defaultSizes
+  );
 
   await sql`
     INSERT INTO products (
       id, name, detail, price, badge, image_url, back_image_url, extra_image_urls,
+      description, sizes, size_chart_url,
       category_id, subcategory_id
     )
     VALUES (
@@ -58,6 +66,9 @@ export async function POST(req: NextRequest) {
       ${imageUrl || "https://placehold.co/400x500/1C1917/9B9188?text=No+image"},
       ${backImageUrl || null},
       ${extraImagesLiteral}::text[],
+      ${description || null},
+      ${sizesJson}::jsonb,
+      ${sizeChartUrl || null},
       ${categoryId || null},
       ${subcategoryId || null}
     )

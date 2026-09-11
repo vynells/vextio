@@ -30,6 +30,9 @@ export async function PUT(
     imageUrl,
     backImageUrl,
     extraImageUrls,
+    description,
+    sizes,
+    sizeChartUrl,
     categoryId,
     subcategoryId,
   } = body;
@@ -37,6 +40,10 @@ export async function PUT(
   const extraImages: string[] =
     Array.isArray(extraImageUrls) && extraImageUrls.length > 0 ? extraImageUrls : [];
   const extraImagesLiteral = toPgTextArray(extraImages);
+  const defaultSizes = { S: true, M: true, L: true, XL: true, XXL: true };
+  const sizesJson = JSON.stringify(
+    sizes && typeof sizes === "object" ? sizes : defaultSizes
+  );
 
   await sql`
     UPDATE products
@@ -44,6 +51,9 @@ export async function PUT(
         badge = ${badge || null}, image_url = ${imageUrl},
         back_image_url = ${backImageUrl || null},
         extra_image_urls = ${extraImagesLiteral}::text[],
+        description = ${description || null},
+        sizes = ${sizesJson}::jsonb,
+        size_chart_url = ${sizeChartUrl || null},
         category_id = ${categoryId || null},
         subcategory_id = ${subcategoryId || null}
     WHERE id = ${id}

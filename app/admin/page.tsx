@@ -13,6 +13,9 @@ type Product = {
   image_url: string;
   back_image_url: string | null;
   extra_image_urls: string[] | null;
+  description: string | null;
+  sizes: Record<string, boolean> | null;
+  size_chart_url: string | null;
   category_id: string | null;
   subcategory_id: string | null;
 };
@@ -54,17 +57,24 @@ export default function AdminPage() {
     imageUrl: "",
     backImageUrl: "",
     extraImageUrls: [] as string[],
+    description: "",
+    sizes: { S: true, M: true, L: true, XL: true, XXL: true } as Record<string, boolean>,
+    sizeChartUrl: "",
     categoryId: "",
     subcategoryId: "",
   });
   const [uploading, setUploading] = useState(false);
   const [uploadingBack, setUploadingBack] = useState(false);
   const [uploadingExtra, setUploadingExtra] = useState(false);
+  const [uploadingSizeChart, setUploadingSizeChart] = useState(false);
   const [formError, setFormError] = useState("");
 
   const [newCategoryName, setNewCategoryName] = useState("");
   const [newSubcategoryName, setNewSubcategoryName] = useState("");
   const [newSubcategoryParent, setNewSubcategoryParent] = useState("");
+
+  const [globalSizeChartUrl, setGlobalSizeChartUrl] = useState("");
+  const [uploadingGlobalChart, setUploadingGlobalChart] = useState(false);
 
   useEffect(() => {
     if (token) fetchAll();
@@ -73,15 +83,64 @@ export default function AdminPage() {
 
   async function fetchAll() {
     setLoading(true);
-    const [pRes, cRes, sRes] = await Promise.all([
+    const [pRes, cRes, sRes, chartRes] = await Promise.all([
       fetch("/api/products"),
       fetch("/api/categories"),
       fetch("/api/subcategories"),
+      fetch("/api/content/global_size_chart_url").catch(() => null),
     ]);
     setProducts(await pRes.json());
     setCategories(await cRes.json());
     setSubcategories(await sRes.json());
+    if (chartRes && chartRes.ok) {
+      const data = await chartRes.json();
+      setGlobalSizeChartUrl(data.value || "");
+    }
     setLoading(false);
+  }
+
+  async function handleGlobalSizeChartUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !token) return;
+
+    setUploadingGlobalChart(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const uploadRes = await fetch("/api/upload", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    });
+
+    if (uploadRes.ok) {
+      const { url } = await uploadRes.json();
+      const saveRes = await fetch("/api/content", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ key: "global_size_chart_url", value: url, section: "products" }),
+      });
+      if (saveRes.ok) {
+        setGlobalSizeChartUrl(url);
+      }
+    }
+    setUploadingGlobalChart(false);
+  }
+
+  async function removeGlobalSizeChart() {
+    if (!token) return;
+    const res = await fetch("/api/content", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ key: "global_size_chart_url", value: "", section: "products" }),
+    });
+    if (res.ok) setGlobalSizeChartUrl("");
   }
 
   async function handleLogin(e: FormEvent) {
@@ -169,6 +228,9 @@ export default function AdminPage() {
       imageUrl: "",
       backImageUrl: "",
       extraImageUrls: [],
+      description: "",
+      sizes: { S: true, M: true, L: true, XL: true, XXL: true },
+      sizeChartUrl: "",
       categoryId: "",
       subcategoryId: "",
     });
@@ -188,6 +250,9 @@ export default function AdminPage() {
       imageUrl: p.image_url,
       backImageUrl: p.back_image_url || "",
       extraImageUrls: p.extra_image_urls || [],
+      description: p.description || "",
+      sizes: p.sizes || { S: true, M: true, L: true, XL: true, XXL: true },
+      sizeChartUrl: p.size_chart_url || "",
       categoryId: p.category_id || "",
       subcategoryId: p.subcategory_id || "",
     });
@@ -265,6 +330,34 @@ export default function AdminPage() {
     }));
   }
 
+  async function handleSizeChartUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !token) return;
+
+    setUploadingSizeChart(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      setForm((f) => ({ ...f, sizeChartUrl: data.url }));
+    }
+    setUploadingSizeChart(false);
+  }
+
+  function toggleSize(size: string) {
+    setForm((f) => ({
+      ...f,
+      sizes: { ...f.sizes, [size]: !f.sizes[size] },
+    }));
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setFormError("");
@@ -284,6 +377,9 @@ export default function AdminPage() {
         "https://placehold.co/400x500/1C1917/9B9188?text=No+image",
       backImageUrl: form.backImageUrl.trim() || null,
       extraImageUrls: form.extraImageUrls,
+      description: form.description.trim() || null,
+      sizes: form.sizes,
+      sizeChartUrl: form.sizeChartUrl.trim() || null,
       categoryId: form.categoryId || null,
       subcategoryId: form.subcategoryId || null,
     };
@@ -542,6 +638,47 @@ export default function AdminPage() {
 
               <div>
                 <label className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-muted">
+                  Description (optional)
+                </label>
+                <textarea
+                  value={form.description}
+                  onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                  rows={4}
+                  placeholder="Full product description shown on the product page"
+                  className="w-full border border-brown/20 bg-transparent px-4 py-2.5 text-[14px] text-brown placeholder:text-muted focus:outline-none focus:border-brown"
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-[11px] font-medium uppercase tracking-wide text-muted">
+                  Sizes in stock
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {["S", "M", "L", "XL", "XXL"].map((size) => {
+                    const inStock = form.sizes[size] ?? true;
+                    return (
+                      <button
+                        key={size}
+                        type="button"
+                        onClick={() => toggleSize(size)}
+                        className={`flex h-10 w-14 items-center justify-center border text-[13px] font-medium transition-colors ${
+                          inStock
+                            ? "border-brown bg-brown text-cream"
+                            : "border-brown/25 text-muted line-through"
+                        }`}
+                      >
+                        {size}
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className="mt-1.5 text-[12px] text-muted">
+                  Tap a size to toggle in stock / out of stock.
+                </p>
+              </div>
+
+              <div>
+                <label className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-muted">
                   Front photo (shown by default)
                 </label>
                 <input type="file" accept="image/*" onChange={handleImageUpload} />
@@ -624,6 +761,35 @@ export default function AdminPage() {
                 </div>
               )}
 
+              <div>
+                <label className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-muted">
+                  Size chart for this product (optional — overrides the global one)
+                </label>
+                <input type="file" accept="image/*" onChange={handleSizeChartUpload} />
+                {uploadingSizeChart && (
+                  <span className="ml-2 text-[12px] text-muted">Uploading...</span>
+                )}
+              </div>
+
+              {form.sizeChartUrl && (
+                <div className="relative h-32 w-24 overflow-hidden bg-tan">
+                  <Image
+                    src={form.sizeChartUrl}
+                    alt="Size chart preview"
+                    fill
+                    sizes="96px"
+                    className="object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setForm((f) => ({ ...f, sizeChartUrl: "" }))}
+                    className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center bg-brown/80 text-[11px] text-cream"
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
+
               {formError && <p className="text-[13px] text-red-500">{formError}</p>}
 
               <button
@@ -691,6 +857,37 @@ export default function AdminPage() {
 
       {activeTab === "sections" && (
         <>
+          <div className="mb-8 border border-brown/15 p-6">
+            <h2 className="mb-1 font-display text-lg font-bold text-brown">
+              Global size chart
+            </h2>
+            <p className="mb-4 text-[13px] font-light text-muted">
+              Shown on every product page, unless a product has its own size chart set.
+            </p>
+            <input type="file" accept="image/*" onChange={handleGlobalSizeChartUpload} />
+            {uploadingGlobalChart && (
+              <span className="ml-2 text-[12px] text-muted">Uploading...</span>
+            )}
+            {globalSizeChartUrl && (
+              <div className="relative mt-3 h-32 w-24 overflow-hidden bg-tan">
+                <Image
+                  src={globalSizeChartUrl}
+                  alt="Global size chart preview"
+                  fill
+                  sizes="96px"
+                  className="object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={removeGlobalSizeChart}
+                  className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center bg-brown/80 text-[11px] text-cream"
+                >
+                  ×
+                </button>
+              </div>
+            )}
+          </div>
+
           <p className="mb-6 text-[13px] font-light text-muted">
             Sections group your products on the shop page (e.g. &quot;Tops&quot;). Subsections are optional finer categories inside a section (e.g. &quot;Cargo&quot; inside &quot;Bottoms&quot;).
           </p>
