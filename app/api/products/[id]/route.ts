@@ -40,7 +40,7 @@ export async function PUT(
   const extraImages: string[] =
     Array.isArray(extraImageUrls) && extraImageUrls.length > 0 ? extraImageUrls : [];
   const extraImagesLiteral = toPgTextArray(extraImages);
-  const defaultSizes = { S: true, M: true, L: true, XL: true, XXL: true };
+  const defaultSizes = { S: 5, M: 5, L: 5, XL: 5, XXL: 5 };
   const sizesJson = JSON.stringify(
     sizes && typeof sizes === "object" ? sizes : defaultSizes
   );

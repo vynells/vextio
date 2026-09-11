@@ -14,6 +14,7 @@ export type CartItem = {
   price: string;
   imageUrl: string;
   qty: number;
+  size?: string;
 };
 
 type AddableProduct = Omit<CartItem, "qty">;
@@ -22,8 +23,8 @@ type CartContextType = {
   items: CartItem[];
   count: number;
   addItem: (product: AddableProduct) => void;
-  removeItem: (id: string) => void;
-  updateQty: (id: string, qty: number) => void;
+  removeItem: (id: string, size?: string) => void;
+  updateQty: (id: string, qty: number, size?: string) => void;
   clearCart: () => void;
   isOpen: boolean;
   openCart: () => void;
@@ -63,27 +64,31 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   function addItem(product: AddableProduct) {
     setItems((prev) => {
-      const existing = prev.find((i) => i.id === product.id);
+      const existing = prev.find(
+        (i) => i.id === product.id && i.size === product.size
+      );
       if (existing) {
         return prev.map((i) =>
-          i.id === product.id ? { ...i, qty: i.qty + 1 } : i
+          i.id === product.id && i.size === product.size
+            ? { ...i, qty: i.qty + 1 }
+            : i
         );
       }
       return [...prev, { ...product, qty: 1 }];
     });
   }
 
-  function removeItem(id: string) {
-    setItems((prev) => prev.filter((i) => i.id !== id));
+  function removeItem(id: string, size?: string) {
+    setItems((prev) => prev.filter((i) => !(i.id === id && i.size === size)));
   }
 
-  function updateQty(id: string, qty: number) {
+  function updateQty(id: string, qty: number, size?: string) {
     if (qty < 1) {
-      removeItem(id);
+      removeItem(id, size);
       return;
     }
     setItems((prev) =>
-      prev.map((i) => (i.id === id ? { ...i, qty } : i))
+      prev.map((i) => (i.id === id && i.size === size ? { ...i, qty } : i))
     );
   }
 

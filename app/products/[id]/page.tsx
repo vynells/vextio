@@ -21,7 +21,7 @@ type DbProduct = {
   back_image_url: string | null;
   extra_image_urls: string[] | null;
   description: string | null;
-  sizes: Record<string, boolean> | null;
+  sizes: Record<string, number> | null;
   size_chart_url: string | null;
   category_id: string | null;
   subcategory_id: string | null;
@@ -91,7 +91,7 @@ export default function ProductDetailPage() {
     ...(product.extra_image_urls || []),
   ].filter(Boolean);
 
-  const sizes = product.sizes || { S: true, M: true, L: true, XL: true, XXL: true };
+  const sizes = product.sizes || { S: 5, M: 5, L: 5, XL: 5, XXL: 5 };
   const orderedSizes = SIZE_ORDER.filter((s) => s in sizes);
 
   const effectiveSizeChartUrl = product.size_chart_url || globalSizeChartUrl;
@@ -219,7 +219,8 @@ export default function ProductDetailPage() {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {orderedSizes.map((size) => {
-                    const inStock = sizes[size];
+                    const qty = sizes[size] ?? 0;
+                    const inStock = qty > 0;
                     const isSelected = selectedSize === size;
                     return (
                       <div key={size} className="group/size relative">

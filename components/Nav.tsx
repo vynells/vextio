@@ -120,7 +120,7 @@ export default function Nav() {
           ) : (
             <div className="flex flex-1 flex-col gap-4 overflow-y-auto">
               {items.map((item) => (
-                <div key={item.id} className="flex gap-3">
+                <div key={`${item.id}-${item.size ?? ""}`} className="flex gap-3">
                   <div className="relative h-20 w-16 flex-shrink-0 overflow-hidden bg-tan">
                     <Image
                       src={item.imageUrl}
@@ -133,11 +133,14 @@ export default function Nav() {
                   <div className="flex flex-1 flex-col justify-center">
                     <p className="text-[13px] font-medium text-brown">
                       {item.name}
+                      {item.size && (
+                        <span className="ml-1 font-normal text-muted">— {item.size}</span>
+                      )}
                     </p>
                     <div className="my-1.5 flex items-center gap-2">
                       <button
                         type="button"
-                        onClick={() => updateQty(item.id, item.qty - 1)}
+                        onClick={() => updateQty(item.id, item.qty - 1, item.size)}
                         aria-label={`Decrease quantity of ${item.name}`}
                         className="flex h-6 w-6 items-center justify-center border border-brown/25 text-[13px] leading-none text-brown hover:bg-brown/10"
                       >
@@ -148,7 +151,7 @@ export default function Nav() {
                       </span>
                       <button
                         type="button"
-                        onClick={() => updateQty(item.id, item.qty + 1)}
+                        onClick={() => updateQty(item.id, item.qty + 1, item.size)}
                         aria-label={`Increase quantity of ${item.name}`}
                         className="flex h-6 w-6 items-center justify-center border border-brown/25 text-[13px] leading-none text-brown hover:bg-brown/10"
                       >
@@ -161,7 +164,7 @@ export default function Nav() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => removeItem(item.id)}
+                    onClick={() => removeItem(item.id, item.size)}
                     aria-label={`Remove ${item.name}`}
                     className="self-start text-lg leading-none text-muted hover:text-brown"
                   >

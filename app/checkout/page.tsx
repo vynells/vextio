@@ -256,7 +256,7 @@ export default function CheckoutPage() {
         ) : (
           <div className="flex flex-col gap-4">
             {items.map((item) => (
-              <div key={item.id} className="flex items-center gap-3">
+              <div key={`${item.id}-${item.size ?? ""}`} className="flex items-center gap-3">
                 <div className="relative h-16 w-14 flex-shrink-0 overflow-hidden bg-tan">
                   <Image
                     src={item.imageUrl}
@@ -269,6 +269,9 @@ export default function CheckoutPage() {
                 <div className="flex flex-1 flex-col">
                   <p className="text-[13px] font-medium text-brown">
                     {item.name}
+                    {item.size && (
+                      <span className="ml-1 font-normal text-muted">— {item.size}</span>
+                    )}
                   </p>
                   <p className="text-[12px] font-light text-muted">
                     Qty {item.qty}
@@ -279,7 +282,7 @@ export default function CheckoutPage() {
                 </p>
                 <button
                   type="button"
-                  onClick={() => removeItem(item.id)}
+                  onClick={() => removeItem(item.id, item.size)}
                   aria-label={`Remove ${item.name}`}
                   className="text-lg leading-none text-muted hover:text-brown"
                 >

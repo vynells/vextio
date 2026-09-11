@@ -14,7 +14,7 @@ type Product = {
   back_image_url: string | null;
   extra_image_urls: string[] | null;
   description: string | null;
-  sizes: Record<string, boolean> | null;
+  sizes: Record<string, number> | null;
   size_chart_url: string | null;
   category_id: string | null;
   subcategory_id: string | null;
@@ -58,7 +58,7 @@ export default function AdminPage() {
     backImageUrl: "",
     extraImageUrls: [] as string[],
     description: "",
-    sizes: { S: true, M: true, L: true, XL: true, XXL: true } as Record<string, boolean>,
+    sizes: { S: 5, M: 5, L: 5, XL: 5, XXL: 5 } as Record<string, number>,
     sizeChartUrl: "",
     categoryId: "",
     subcategoryId: "",
@@ -229,7 +229,7 @@ export default function AdminPage() {
       backImageUrl: "",
       extraImageUrls: [],
       description: "",
-      sizes: { S: true, M: true, L: true, XL: true, XXL: true },
+      sizes: { S: 5, M: 5, L: 5, XL: 5, XXL: 5 },
       sizeChartUrl: "",
       categoryId: "",
       subcategoryId: "",
@@ -251,7 +251,7 @@ export default function AdminPage() {
       backImageUrl: p.back_image_url || "",
       extraImageUrls: p.extra_image_urls || [],
       description: p.description || "",
-      sizes: p.sizes || { S: true, M: true, L: true, XL: true, XXL: true },
+      sizes: p.sizes || { S: 5, M: 5, L: 5, XL: 5, XXL: 5 },
       sizeChartUrl: p.size_chart_url || "",
       categoryId: p.category_id || "",
       subcategoryId: p.subcategory_id || "",
@@ -351,10 +351,10 @@ export default function AdminPage() {
     setUploadingSizeChart(false);
   }
 
-  function toggleSize(size: string) {
+  function setSizeQty(size: string, qty: number) {
     setForm((f) => ({
       ...f,
-      sizes: { ...f.sizes, [size]: !f.sizes[size] },
+      sizes: { ...f.sizes, [size]: Math.max(0, qty) },
     }));
   }
 
@@ -651,29 +651,31 @@ export default function AdminPage() {
 
               <div>
                 <label className="mb-2 block text-[11px] font-medium uppercase tracking-wide text-muted">
-                  Sizes in stock
+                  Stock per size
                 </label>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-3">
                   {["S", "M", "L", "XL", "XXL"].map((size) => {
-                    const inStock = form.sizes[size] ?? true;
+                    const qty = form.sizes[size] ?? 0;
                     return (
-                      <button
-                        key={size}
-                        type="button"
-                        onClick={() => toggleSize(size)}
-                        className={`flex h-10 w-14 items-center justify-center border text-[13px] font-medium transition-colors ${
-                          inStock
-                            ? "border-brown bg-brown text-cream"
-                            : "border-brown/25 text-muted line-through"
-                        }`}
-                      >
-                        {size}
-                      </button>
+                      <div key={size} className="flex flex-col items-center gap-1">
+                        <span className="text-[11px] font-medium text-muted">{size}</span>
+                        <input
+                          type="number"
+                          min={0}
+                          value={qty}
+                          onChange={(e) => setSizeQty(size, parseInt(e.target.value, 10) || 0)}
+                          className={`h-10 w-16 border text-center text-[13px] font-medium focus:outline-none ${
+                            qty > 0
+                              ? "border-brown/25 text-brown focus:border-brown"
+                              : "border-red-300 text-red-500"
+                          }`}
+                        />
+                      </div>
                     );
                   })}
                 </div>
                 <p className="mt-1.5 text-[12px] text-muted">
-                  Tap a size to toggle in stock / out of stock.
+                  Set the quantity in stock for each size. 0 means out of stock.
                 </p>
               </div>
 

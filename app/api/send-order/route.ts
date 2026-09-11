@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
+import { sql } from "@vercel/postgres";
 import { parsePrice, formatPKR } from "@/lib/price";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -38,6 +39,37 @@ export async function POST(req: NextRequest) {
     );
     const shipping = items.length > 0 ? 300 : 0;
     const total = subtotal + shipping;
+
+    // --- Save the order to the database ---
+    await sql`
+      INSERT INTO orders (
+        order_number, status, contact, first_name, last_name, address, apartment,
+        city, postal_code, phone, payment_method, items, subtotal, shipping, total
+      )
+      VALUES (
+        ${orderNumber}, 'pending', ${contact}, ${firstName}, ${lastName}, ${address}, ${apartment || null},
+        ${city}, ${postalCode || null}, ${phone}, ${paymentMethod},
+        ${JSON.stringify(items)}::jsonb, ${subtotal}, ${shipping}, ${total}
+      )
+    `;
+
+    // --- Decrement stock quantity for each sized item ordered ---
+    for (const item of items as { id: string; size?: string; qty: number }[]) {
+      if (!item.size) continue; // sizeless items don't track per-size stock
+      try {
+        const { rows } = await sql`SELECT sizes FROM products WHERE id = ${item.id}`;
+        if (rows.length === 0) continue;
+        const currentSizes: Record<string, number> = rows[0].sizes || {};
+        const currentQty = currentSizes[item.size] ?? 0;
+        const newQty = Math.max(0, currentQty - (item.qty || 1));
+        const updatedSizes = { ...currentSizes, [item.size]: newQty };
+        await sql`
+          UPDATE products SET sizes = ${JSON.stringify(updatedSizes)}::jsonb WHERE id = ${item.id}
+        `;
+      } catch (stockErr) {
+        console.error(`Failed to update stock for ${item.id} size ${item.size}:`, stockErr);
+      }
+    }
 
     const itemsRowsHtml = items
       .map(
