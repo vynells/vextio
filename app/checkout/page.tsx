@@ -8,7 +8,7 @@ import { parsePrice, formatPKR } from "@/lib/price";
 type PaymentMethod = "cod" | "card" | "bank" | "easypaisa";
 
 export default function CheckoutPage() {
-  const { items, removeItem } = useCart();
+  const { items, removeItem, clearCart } = useCart();
 
   const subtotal = items.reduce(
     (sum, item) => sum + parsePrice(item.price) * item.qty,
@@ -60,6 +60,7 @@ export default function CheckoutPage() {
       }
 
       setPlaced(true);
+      clearCart();
     } catch {
       setError(
         "Something went wrong placing your order. Please try again or contact us directly."

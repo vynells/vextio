@@ -24,6 +24,7 @@ type CartContextType = {
   addItem: (product: AddableProduct) => void;
   removeItem: (id: string) => void;
   updateQty: (id: string, qty: number) => void;
+  clearCart: () => void;
   isOpen: boolean;
   openCart: () => void;
   closeCart: () => void;
@@ -86,6 +87,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
     );
   }
 
+  function clearCart() {
+    setItems([]);
+  }
+
   function openCart() {
     setIsOpen(true);
   }
@@ -98,7 +103,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   return (
     <CartContext.Provider
-      value={{ items, count, addItem, removeItem, updateQty, isOpen, openCart, closeCart }}
+      value={{ items, count, addItem, removeItem, updateQty, clearCart, isOpen, openCart, closeCart }}
     >
       {children}
     </CartContext.Provider>
