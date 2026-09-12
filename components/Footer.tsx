@@ -61,6 +61,32 @@ export default function Footer() {
 
         <div>
           <h4 className="mb-5 text-[11px] font-medium uppercase tracking-[0.2em] text-gold">
+            Help
+          </h4>
+          <Link
+            href="/help"
+            className="mb-2.5 block text-[13px] font-light text-cream/50 transition-colors hover:text-cream"
+          >
+            Help & Support
+          </Link>
+          <a
+            href="https://wa.me/923340927688"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mb-2.5 block text-[13px] font-light text-cream/50 transition-colors hover:text-cream"
+          >
+            WhatsApp us
+          </a>
+          <a
+            href="mailto:help@blackoutmc.xyz"
+            className="mb-2.5 block text-[13px] font-light text-cream/50 transition-colors hover:text-cream"
+          >
+            help@blackoutmc.xyz
+          </a>
+        </div>
+
+        <div>
+          <h4 className="mb-5 text-[11px] font-medium uppercase tracking-[0.2em] text-gold">
             Contact
           </h4>
           <EditableText
