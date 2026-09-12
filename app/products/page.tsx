@@ -17,6 +17,8 @@ type DbProduct = {
   image_url: string;
   back_image_url: string | null;
   extra_image_urls: string[] | null;
+  sizes: Record<string, number> | null;
+  size_chart_url: string | null;
   category_id: string | null;
   subcategory_id: string | null;
 };
@@ -39,6 +41,8 @@ function toProduct(p: DbProduct): Product {
     imageUrl: p.image_url,
     backImageUrl: p.back_image_url || undefined,
     extraImageUrls: p.extra_image_urls || undefined,
+    sizes: p.sizes || undefined,
+    sizeChartUrl: p.size_chart_url || undefined,
   };
 }
 
