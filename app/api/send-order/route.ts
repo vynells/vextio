@@ -37,6 +37,7 @@ export async function POST(req: NextRequest) {
     } = body;
 
     const orderNumber = generateOrderNumber();
+    const initialStatus = paymentMethod === "Cash on Delivery" ? "processing" : "pending";
 
     const subtotal = items.reduce(
       (sum: number, item: { price: string; qty: number }) =>
@@ -53,7 +54,7 @@ export async function POST(req: NextRequest) {
         city, postal_code, phone, payment_method, items, subtotal, shipping, total
       )
       VALUES (
-        ${orderNumber}, 'processing', ${contact}, ${firstName}, ${lastName}, ${address}, ${apartment || null},
+        ${orderNumber}, ${initialStatus}, ${contact}, ${firstName}, ${lastName}, ${address}, ${apartment || null},
         ${city}, ${postalCode || null}, ${phone}, ${paymentMethod},
         ${JSON.stringify(items)}::jsonb, ${subtotal}, ${shipping}, ${total}
       )

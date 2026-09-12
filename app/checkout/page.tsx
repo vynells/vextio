@@ -7,6 +7,14 @@ import { parsePrice, formatPKR } from "@/lib/price";
 
 type PaymentMethod = "cod" | "card" | "bank" | "easypaisa";
 
+const PAYMENT_LABELS: Record<PaymentMethod, string> = {
+  cod: "Cash on Delivery",
+  card: "Card (Debit & Credit)",
+  bank: "Bank transfer",
+  easypaisa: "Easypaisa",
+};
+
+
 export default function CheckoutPage() {
   const { items, removeItem, clearCart } = useCart();
 
@@ -25,15 +33,14 @@ export default function CheckoutPage() {
   const [postalCode, setPostalCode] = useState("");
   const [phone, setPhone] = useState("");
   const [saveInfo, setSaveInfo] = useState(false);
-  const [payment] = useState<PaymentMethod>("cod");
-  const [infoMethod, setInfoMethod] = useState<PaymentMethod | null>(null);
+  const [payment, setPayment] = useState<PaymentMethod>("cod");
   const [placed, setPlaced] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (payment !== "cod" || items.length === 0) return;
+    if (items.length === 0) return;
 
     setSubmitting(true);
     setError("");
@@ -51,7 +58,7 @@ export default function CheckoutPage() {
           city,
           postalCode,
           phone,
-          paymentMethod: "Cash on Delivery",
+          paymentMethod: PAYMENT_LABELS[payment],
           items,
         }),
       });
@@ -204,40 +211,40 @@ export default function CheckoutPage() {
             <PaymentOption
               id="card"
               label="Card (Debit & Credit)"
-              selected={false}
-              onClick={() => setInfoMethod("card")}
+              selected={payment === "card"}
+              onClick={() => setPayment("card")}
             />
             <PaymentOption
               id="bank"
               label="All Pakistani banks"
-              selected={false}
-              onClick={() => setInfoMethod("bank")}
+              selected={payment === "bank"}
+              onClick={() => setPayment("bank")}
             />
             <PaymentOption
               id="easypaisa"
               label="Easypaisa"
-              selected={false}
-              onClick={() => setInfoMethod("easypaisa")}
+              selected={payment === "easypaisa"}
+              onClick={() => setPayment("easypaisa")}
             />
             <PaymentOption
               id="cod"
               label="Cash on Delivery (COD)"
               selected={payment === "cod"}
-              onClick={() => setInfoMethod(null)}
+              onClick={() => setPayment("cod")}
               isLast
             />
           </div>
 
-          {infoMethod && (
+          {payment !== "cod" && (
             <p className="mt-3 flex items-start gap-2 border border-rust/30 bg-rust/5 px-4 py-3 text-[13px] text-brown">
               <span className="mt-[1px] font-bold text-rust">!</span>
               <span>
-                Online payments aren&apos;t processed automatically yet. Place your order using
-                Cash on Delivery, then message{" "}
+                Online payments aren&apos;t processed automatically yet. After placing your order,
+                message{" "}
                 <a href="tel:+923340927688" className="font-medium underline underline-offset-2">
                   +92 334 0927688
                 </a>{" "}
-                and we&apos;ll guide you through paying online instead.
+                and we&apos;ll guide you through paying online.
               </span>
             </p>
           )}
@@ -254,7 +261,7 @@ export default function CheckoutPage() {
           disabled={items.length === 0 || submitting}
           className="w-full bg-rust px-6 py-4 text-[13px] font-medium uppercase tracking-[0.12em] text-cream transition-colors hover:bg-[#7a3418] disabled:cursor-not-allowed disabled:opacity-40"
         >
-          {submitting ? "Placing order..." : "Place order — Cash on Delivery"}
+          {submitting ? "Placing order..." : `Place order — ${PAYMENT_LABELS[payment]}`}
         </button>
       </form>
 
