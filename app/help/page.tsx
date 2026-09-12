@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import FadeIn from "@/components/FadeIn";
@@ -51,9 +52,9 @@ export default function HelpPage() {
 
           <p className="mt-10 text-[13px] text-muted">
             Placed an order already? You can also{" "}
-            <a href="/products" className="underline underline-offset-2 hover:text-brown">
+            <Link href="/products" className="underline underline-offset-2 hover:text-brown">
               track it from your confirmation email
-            </a>
+            </Link>
             .
           </p>
         </FadeIn>
