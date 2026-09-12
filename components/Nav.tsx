@@ -8,7 +8,6 @@ import { parsePrice, formatPKR } from "@/lib/price";
 
 const links = [
   { label: "Shop", href: "/products" },
-  { label: "Collections", href: "/products" },
   { label: "Help", href: "/help" },
   { label: "Terms", href: "/terms" },
 ];
