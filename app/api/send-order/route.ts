@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
         city, postal_code, phone, payment_method, items, subtotal, shipping, total
       )
       VALUES (
-        ${orderNumber}, 'pending', ${contact}, ${firstName}, ${lastName}, ${address}, ${apartment || null},
+        ${orderNumber}, 'processing', ${contact}, ${firstName}, ${lastName}, ${address}, ${apartment || null},
         ${city}, ${postalCode || null}, ${phone}, ${paymentMethod},
         ${JSON.stringify(items)}::jsonb, ${subtotal}, ${shipping}, ${total}
       )

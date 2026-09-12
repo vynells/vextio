@@ -26,6 +26,7 @@ export default function CheckoutPage() {
   const [phone, setPhone] = useState("");
   const [saveInfo, setSaveInfo] = useState(false);
   const [payment] = useState<PaymentMethod>("cod");
+  const [infoMethod, setInfoMethod] = useState<PaymentMethod | null>(null);
   const [placed, setPlaced] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -204,28 +205,42 @@ export default function CheckoutPage() {
               id="card"
               label="Card (Debit & Credit)"
               selected={false}
-              disabled
+              onClick={() => setInfoMethod("card")}
             />
             <PaymentOption
               id="bank"
               label="All Pakistani banks"
               selected={false}
-              disabled
+              onClick={() => setInfoMethod("bank")}
             />
             <PaymentOption
               id="easypaisa"
               label="Easypaisa"
               selected={false}
-              disabled
+              onClick={() => setInfoMethod("easypaisa")}
             />
             <PaymentOption
               id="cod"
               label="Cash on Delivery (COD)"
               selected={payment === "cod"}
-              disabled={false}
+              onClick={() => setInfoMethod(null)}
               isLast
             />
           </div>
+
+          {infoMethod && (
+            <p className="mt-3 flex items-start gap-2 border border-rust/30 bg-rust/5 px-4 py-3 text-[13px] text-brown">
+              <span className="mt-[1px] font-bold text-rust">!</span>
+              <span>
+                Online payments aren&apos;t processed automatically yet. Place your order using
+                Cash on Delivery, then message{" "}
+                <a href="tel:+923340927688" className="font-medium underline underline-offset-2">
+                  +92 334 0927688
+                </a>{" "}
+                and we&apos;ll guide you through paying online instead.
+              </span>
+            </p>
+          )}
         </section>
 
         {error && (
@@ -316,21 +331,22 @@ function PaymentOption({
   id,
   label,
   selected,
-  disabled,
+  onClick,
   isLast,
 }: {
   id: string;
   label: string;
   selected: boolean;
-  disabled: boolean;
+  onClick: () => void;
   isLast?: boolean;
 }) {
   return (
     <label
       htmlFor={id}
-      className={`flex items-center justify-between gap-3 px-4 py-4 text-[14px] ${
+      onClick={onClick}
+      className={`flex cursor-pointer items-center justify-between gap-3 px-4 py-4 text-[14px] ${
         isLast ? "" : "border-b border-brown/20"
-      } ${disabled ? "cursor-not-allowed opacity-45" : "cursor-pointer"}`}
+      }`}
     >
       <span className="flex items-center gap-3">
         <input
@@ -338,17 +354,11 @@ function PaymentOption({
           id={id}
           name="payment"
           checked={selected}
-          disabled={disabled}
           readOnly
           className="h-4 w-4"
         />
         <span className="text-brown">{label}</span>
       </span>
-      {disabled && (
-        <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted">
-          Unavailable
-        </span>
-      )}
     </label>
   );
 }
