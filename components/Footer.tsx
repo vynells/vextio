@@ -104,24 +104,13 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="flex flex-col items-center justify-between gap-4 border-t border-cream/10 pt-6 sm:flex-row">
+      <div className="flex flex-col items-center justify-center gap-4 border-t border-cream/10 pt-6">
         <EditableText
           contentKey="footer_copyright"
           defaultValue="© 2024 Vextio. All rights reserved."
           as="p"
           className="text-[12px] text-cream/30"
         />
-        <div className="flex gap-6">
-          {["Instagram", "TikTok", "Pinterest"].map((social) => (
-            <a
-              key={social}
-              href="#"
-              className="text-[11px] uppercase tracking-[0.15em] text-cream/40 transition-colors hover:text-cream"
-            >
-              {social}
-            </a>
-          ))}
-        </div>
       </div>
     </footer>
   );
