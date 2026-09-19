@@ -106,10 +106,11 @@ export default function ProductDetailPage() {
     if (!product) return;
 
     addItem({
-      id: selectedSize ? `${product.id}-${selectedSize}` : product.id,
-      name: selectedSize ? `${product.name} (${selectedSize})` : product.name,
+      id: product.id,
+      name: product.name,
       price: product.price,
       imageUrl: product.image_url,
+      size: selectedSize || undefined,
     });
     setAdded(true);
     openCart();
