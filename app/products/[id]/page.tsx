@@ -193,7 +193,20 @@ export default function ProductDetailPage() {
             <h1 className="mb-3 font-display text-[2rem] font-bold text-brown md:text-[2.4rem]">
               {product.name}
             </h1>
-            <p className="mb-6 font-legal text-xl font-bold text-brown">{product.price}</p>
+            <p className="mb-1 font-legal text-xl font-bold text-brown">{product.price}</p>
+
+            {selectedSize && (
+              <p
+                className={
+                  (sizes[selectedSize] ?? 0) <= 5
+                    ? "mb-6 text-[13px] font-semibold text-red-600"
+                    : "mb-6 text-[11px] text-muted/70"
+                }
+              >
+                {sizes[selectedSize] ?? 0} in stock
+              </p>
+            )}
+            {!selectedSize && <div className="mb-6" />}
 
             {product.description && (
               <p className="mb-8 whitespace-pre-line text-[14px] font-light leading-relaxed text-muted">
@@ -222,9 +235,8 @@ export default function ProductDetailPage() {
                     const qty = sizes[size] ?? 0;
                     const inStock = qty > 0;
                     const isSelected = selectedSize === size;
-                    const lowStock = inStock && qty <= 5;
                     return (
-                      <div key={size} className="group/size relative flex flex-col items-center">
+                      <div key={size} className="group/size relative">
                         <button
                           type="button"
                           disabled={!inStock}
@@ -239,17 +251,6 @@ export default function ProductDetailPage() {
                         >
                           {size}
                         </button>
-                        {inStock && (
-                          <span
-                            className={
-                              lowStock
-                                ? "mt-1 text-[10px] font-semibold text-red-600"
-                                : "mt-1 text-[9px] text-muted/70"
-                            }
-                          >
-                            {qty} in stock
-                          </span>
-                        )}
                         {!inStock && (
                           <span className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap bg-brown px-2 py-1 text-[10px] uppercase tracking-wide text-cream opacity-0 transition-opacity group-hover/size:opacity-100">
                             Out of stock
