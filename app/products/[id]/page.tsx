@@ -199,8 +199,8 @@ export default function ProductDetailPage() {
               <p
                 className={
                   (sizes[selectedSize] ?? 0) <= 5
-                    ? "mb-6 text-[13px] font-semibold text-red-600"
-                    : "mb-6 text-[11px] text-muted/70"
+                    ? "mb-6 mt-2 text-[15px] font-semibold text-red-600"
+                    : "mb-6 mt-2 text-[13px] text-muted/70"
                 }
               >
                 {sizes[selectedSize] ?? 0} in stock
