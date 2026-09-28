@@ -130,9 +130,9 @@ public class Earthquake extends Disaster {
         for (Player p : players) {
             double dist = p.getLocation().distance(center.clone().add(0, p.getLocation().getY() - center.getY(), 0));
             double local = intensity * Math.max(0.25, 1 - dist / radius);
-            if (ticks % 2 == 0) FX.shake(p, local * 2.2);
-            if (t % 40 == 0 && local > 0.8) p.addPotionEffect(new PotionEffect(PotionEffectType.NAUSEA, 100, 0, true, false, false));
-            if (local > 1.2 && p.isOnGround() && random.nextDouble() < 0.02 * level) {
+            if (ticks % 3 == 0) FX.shake(p, local * 2.2);
+            
+            if (local > 1.2 && p.isOnGround() && random.nextDouble() < 0.004 * level) {
                 p.setVelocity(p.getVelocity().add(new Vector(rnd(-0.4, 0.4), 0.45, rnd(-0.4, 0.4))));
             }
             // Ground dust + debris crumbs around each player

@@ -17,6 +17,7 @@ public final class NaturalDisasters extends JavaPlugin {
     public void onEnable() {
         instance = this;
         saveDefaultConfig();
+        com.vextio.disasters.util.FX.shakeScale = getConfig().getDouble("screen-shake", 0.35);
         manager = new DisasterManager(this);
         gui = new DisasterGUI(this);
 

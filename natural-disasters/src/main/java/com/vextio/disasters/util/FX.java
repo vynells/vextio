@@ -41,16 +41,20 @@ public final class FX {
     }
 
     /** Camera shake: jitters the view and nudges the body. Amplitude ~ degrees. */
+    /** Global screen-shake multiplier (config: screen-shake). */
+    public static double shakeScale = 0.35;
+
     public static void shake(Player p, double amp) {
-        if (p.isInsideVehicle() || p.isGliding() || amp <= 0) return;
+        amp *= shakeScale;
+        if (p.isInsideVehicle() || p.isGliding() || amp <= 0.05) return;
         ThreadLocalRandom r = ThreadLocalRandom.current();
         Location l = p.getLocation();
         Vector vel = p.getVelocity();
         l.setYaw((float) (l.getYaw() + r.nextGaussian() * amp));
         l.setPitch((float) Math.max(-90, Math.min(90, l.getPitch() + r.nextGaussian() * amp * 0.7)));
         p.teleport(l);
-        double push = Math.min(0.35, amp * 0.03);
-        vel.add(new Vector(r.nextGaussian() * push, p.isOnGround() && r.nextDouble() < amp * 0.02 ? 0.25 : 0, r.nextGaussian() * push));
+        double push = Math.min(0.08, amp * 0.015);
+        vel.add(new Vector(r.nextGaussian() * push, 0, r.nextGaussian() * push));
         p.setVelocity(vel);
     }
 
@@ -72,6 +76,27 @@ public final class FX {
             Location l = c.clone().add(Math.cos(a) * radius, 0.2, Math.sin(a) * radius);
             if (data != null) w.spawnParticle(particle, l, 1, 0.1, 0.05, 0.1, 0, data);
             else w.spawnParticle(particle, l, 1, 0.1, 0.05, 0.1, 0);
+        }
+    }
+
+    /** Twin helix of dust around a travel direction, for clean magic trails. */
+    public static void helix(Location l, org.bukkit.util.Vector dir, double r, double phase, Particle.DustOptions a, Particle.DustOptions b) {
+        org.bukkit.util.Vector d = dir.clone().normalize();
+        org.bukkit.util.Vector u = Math.abs(d.getY()) > 0.9 ? new org.bukkit.util.Vector(1, 0, 0) : new org.bukkit.util.Vector(0, 1, 0);
+        org.bukkit.util.Vector s1 = d.getCrossProduct(u).normalize(), s2 = d.getCrossProduct(s1).normalize();
+        for (int i = 0; i < 2; i++) {
+            double ang = phase + i * Math.PI;
+            Location p = l.clone().add(s1.clone().multiply(Math.cos(ang) * r)).add(s2.clone().multiply(Math.sin(ang) * r));
+            l.getWorld().spawnParticle(Particle.DUST, p, 1, 0, 0, 0, 0, i == 0 ? a : b);
+        }
+    }
+
+    /** Pulsing ground circle that warns where an attack will land. */
+    public static void telegraph(Location c, double radius, Particle.DustOptions color) {
+        int pts = (int) (radius * 14);
+        for (int i = 0; i < pts; i++) {
+            double a = Math.PI * 2 * i / pts;
+            c.getWorld().spawnParticle(Particle.DUST, c.clone().add(Math.cos(a) * radius, 0.15, Math.sin(a) * radius), 1, 0, 0, 0, 0, color);
         }
     }
 

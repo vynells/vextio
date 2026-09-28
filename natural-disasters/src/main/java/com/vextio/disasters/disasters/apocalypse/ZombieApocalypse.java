@@ -131,7 +131,7 @@ public class ZombieApocalypse extends Disaster {
     private void startWave() {
         wave++;
         boolean last = wave == totalWaves;
-        waveSize = 3 + wave * 2 + level * 2;
+        waveSize = 2 + wave + level;
         bar.setTitle("§4§l☣ WAVE " + wave + "/" + totalWaves + (last ? " §8— §4§lFINAL WAVE" : ""));
         bar.setColor(BarColor.RED);
         for (Player p : nearbyPlayers(radius + 40)) {
@@ -225,7 +225,7 @@ public class ZombieApocalypse extends Disaster {
 
         Entity raw = world.spawnEntity(at, el.entity);
         if (!(raw instanceof Mob mob)) { raw.remove(); return; }
-        double mult = 1 + (level - 1) * 0.2 + (wave - 1) * 0.1;
+        double mult = 1 + (level - 1) * 0.1 + (wave - 1) * 0.05;
         mob.getPersistentDataContainer().set(KEY, PersistentDataType.STRING, el.name());
         mob.setCustomName(el.name + (el == Element.WARLORD ? "" : " §7[Lv" + level + "]"));
         mob.setCustomNameVisible(true);
@@ -238,7 +238,7 @@ public class ZombieApocalypse extends Disaster {
         attr(mob, Attribute.MOVEMENT_SPEED, el.speed);
         attr(mob, Attribute.ATTACK_DAMAGE, el.damage * mult);
         attr(mob, Attribute.FOLLOW_RANGE, 64);
-        attr(mob, Attribute.KNOCKBACK_RESISTANCE, el == Element.EARTH || el == Element.WARLORD ? 1.0 : 0.4);
+        attr(mob, Attribute.KNOCKBACK_RESISTANCE, el == Element.EARTH || el == Element.WARLORD ? 0.6 : 0.0);
         if (el == Element.FIRE || el == Element.WARLORD) {
             mob.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, PotionEffect.INFINITE_DURATION, 0, false, false));
             mob.setVisualFire(true);
@@ -309,7 +309,7 @@ public class ZombieApocalypse extends Disaster {
         long ready = cooldown.getOrDefault(m.getUniqueId(), 0L);
         if (ticks < ready) return;
         double dist = m.getLocation().distance(target.getLocation());
-        if (dist > 28 || !m.hasLineOfSight(target)) return;
+        if (dist > 22 || !m.hasLineOfSight(target)) return;
 
         Element cast = el == Element.WARLORD ? Element.REGULAR[random.nextInt(Element.REGULAR.length)] : el;
         boolean close = dist < 6;
@@ -321,7 +321,7 @@ public class ZombieApocalypse extends Disaster {
             case LIGHTNING -> chainLightning(m, target);
             default -> {}
         }
-        int cd = (int) ((el == Element.WARLORD ? 50 : 90 - level * 8) + random.nextInt(40));
+        int cd = (int) ((el == Element.WARLORD ? 80 : 150 - level * 8) + random.nextInt(60));
         cooldown.put(m.getUniqueId(), ticks + cd);
     }
 
@@ -396,26 +396,28 @@ public class ZombieApocalypse extends Disaster {
         }
     }
 
-    private double dmg(double base) { return base * (1 + (level - 1) * 0.25); }
+    private double dmg(double base) { return base * 0.5 * (1 + (level - 1) * 0.12); }
 
     // FIRE ---------------------------------------------------------------------
 
     private void fireball(Mob m, Player t) {
         windup(m, Particle.FLAME, null);
         FX.sound(m.getLocation(), Sound.ENTITY_BLAZE_SHOOT, 1.5f, 0.6f);
-        new Bolt(eye(m), aim(m, t), 1.2, 40, 1.2, m, l -> {
-            world.spawnParticle(Particle.FLAME, l, 4, 0.15, 0.15, 0.15, 0.02);
-            world.spawnParticle(Particle.DUST, l, 2, 0.1, 0.1, 0.1, 0, FX.dust(255, 120, 0, 1.6f));
-            if (random.nextInt(4) == 0) world.spawnParticle(Particle.LAVA, l, 1, 0, 0, 0, 0);
+        Vector aimDir = aim(m, t);
+        new Bolt(eye(m), aimDir, 1.2, 40, 1.2, m, l -> {
+            world.spawnParticle(Particle.FLAME, l, 1, 0.03, 0.03, 0.03, 0.005);
+            world.spawnParticle(Particle.DUST, l, 1, 0, 0, 0, 0, FX.dust(255, 230, 120, 1.3f));
+            FX.helix(l, aimDir, 0.35, l.getX() * 3 + l.getZ() * 3, FX.dust(255, 90, 0, 0.9f), FX.dust(255, 170, 30, 0.9f));
         }, (l, hit) -> {
-            world.spawnParticle(Particle.EXPLOSION, l, 2, 0.3, 0.3, 0.3, 0);
-            world.spawnParticle(Particle.FLAME, l, 60, 0.6, 0.6, 0.6, 0.15);
+            world.spawnParticle(Particle.FLAME, l, 40, 0.1, 0.1, 0.1, 0.18);
+            world.spawnParticle(Particle.SMOKE, l, 15, 0.3, 0.3, 0.3, 0.03);
+            FX.ring(l, 1.5, Particle.DUST, 20, FX.dust(255, 120, 20, 1.2f));
             FX.sound(l, Sound.ENTITY_GENERIC_EXPLODE, 1.5f, 1.2f);
             for (Entity e : world.getNearbyEntities(l, 3, 3, 3)) {
                 if (e instanceof Player p) {
                     p.damage(dmg(6), m);
-                    p.setFireTicks(80 + level * 20);
-                    p.setVelocity(p.getLocation().toVector().subtract(l.toVector()).normalize().multiply(0.8).setY(0.4));
+                    p.setFireTicks(40);
+                    p.setVelocity(p.getLocation().toVector().subtract(l.toVector()).normalize().multiply(0.4).setY(0.25));
                 }
             }
             Block b = l.getBlock();
@@ -427,7 +429,15 @@ public class ZombieApocalypse extends Disaster {
         Location c = m.getLocation().add(0, 0.3, 0);
         FX.sound(c, Sound.ITEM_FIRECHARGE_USE, 2f, 0.5f);
         FX.sound(c, Sound.ENTITY_BLAZE_AMBIENT, 1.5f, 0.5f);
-        for (int r = 1; r <= 7; r++) {
+        for (int i = 0; i < 14; i += 2) {
+            final int k = i;
+            plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                FX.telegraph(c, 6, FX.dust(255, 80, 0, 1.1f));
+                world.spawnParticle(Particle.FLAME, m.getLocation().add(0, 1, 0), 8, 0.4, 0.6, 0.4, 0.01);
+                if (k == 12) world.spawnParticle(Particle.FLAME, c, 40, 0.2, 0.2, 0.2, 0.25);
+            }, i);
+        }
+        for (int r = 1; r <= 6; r++) {
             final double rad = r;
             plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
                 FX.ring(c, rad, Particle.FLAME, (int) (rad * 10), null);
@@ -437,11 +447,11 @@ public class ZombieApocalypse extends Disaster {
                     double d = p.getLocation().distance(c);
                     if (d > rad - 1 && d <= rad) {
                         p.damage(dmg(5), m);
-                        p.setFireTicks(100);
-                        p.setVelocity(p.getLocation().toVector().subtract(c.toVector()).normalize().multiply(1.0).setY(0.5));
+                        p.setFireTicks(40);
+                        p.setVelocity(p.getLocation().toVector().subtract(c.toVector()).normalize().multiply(0.5).setY(0.3));
                     }
                 }
-            }, r);
+            }, 14L + r);
         }
     }
 
@@ -450,19 +460,20 @@ public class ZombieApocalypse extends Disaster {
     private void waterBlast(Mob m, Player t) {
         windup(m, Particle.SPLASH, null);
         FX.sound(m.getLocation(), Sound.ITEM_TRIDENT_RIPTIDE_3, 1.5f, 0.8f);
-        new Bolt(eye(m), aim(m, t), 1.3, 40, 1.3, m, l -> {
-            world.spawnParticle(Particle.SPLASH, l, 10, 0.2, 0.2, 0.2, 0.1);
-            world.spawnParticle(Particle.DUST, l, 3, 0.15, 0.15, 0.15, 0, FX.dust(40, 120, 255, 1.8f));
-            world.spawnParticle(Particle.BUBBLE_POP, l, 2, 0.1, 0.1, 0.1, 0.02);
+        Vector wDir = aim(m, t);
+        new Bolt(eye(m), wDir, 1.3, 40, 1.3, m, l -> {
+            world.spawnParticle(Particle.DUST, l, 1, 0, 0, 0, 0, FX.dust(200, 235, 255, 1.3f));
+            FX.helix(l, wDir, 0.3, l.getX() * 3 + l.getZ() * 3, FX.dust(30, 110, 255, 0.9f), FX.dust(80, 200, 255, 0.9f));
+            if (random.nextInt(3) == 0) world.spawnParticle(Particle.SPLASH, l, 2, 0.05, 0.05, 0.05, 0.02);
         }, (l, hit) -> {
-            world.spawnParticle(Particle.SPLASH, l, 120, 1, 1, 1, 0.3);
-            world.spawnParticle(Particle.FALLING_WATER, l, 40, 1, 1, 1, 0);
+            world.spawnParticle(Particle.SPLASH, l, 60, 0.4, 0.4, 0.4, 0.3);
+            FX.ring(l, 1.5, Particle.DUST, 20, FX.dust(60, 150, 255, 1.2f));
             FX.sound(l, Sound.ENTITY_GENERIC_SPLASH, 2f, 0.6f);
             for (Entity e : world.getNearbyEntities(l, 3, 3, 3)) {
                 if (!(e instanceof Player p)) continue;
                 p.damage(dmg(5), m);
-                p.setVelocity(aim(m, p).multiply(1.8).setY(0.6));
-                p.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 60, 1));
+                p.setVelocity(aim(m, p).multiply(0.8).setY(0.35));
+                p.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 40, 0));
                 p.setFireTicks(0);
             }
         }).launch(plugin);
@@ -472,6 +483,10 @@ public class ZombieApocalypse extends Disaster {
         Location c = t.getLocation();
         FX.sound(c, Sound.AMBIENT_UNDERWATER_ENTER, 2f, 0.5f);
         FX.sound(c, Sound.ITEM_BUCKET_EMPTY, 2f, 0.5f);
+        for (int i = 0; i < 20; i += 2) {
+            final double grow = 1.5 + i * 0.15;
+            plugin.getServer().getScheduler().runTaskLater(plugin, () -> FX.telegraph(c, grow, FX.dust(60, 160, 255, 1.1f)), i);
+        }
         for (int i = 0; i < 50; i++) {
             final int k = i;
             plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
@@ -490,11 +505,11 @@ public class ZombieApocalypse extends Disaster {
                     if (!(e instanceof Player p)) continue;
                     Vector pull = c.toVector().subtract(p.getLocation().toVector());
                     Vector swirl = new Vector(-pull.getZ(), 0, pull.getX()).normalize().multiply(0.3);
-                    p.setVelocity(pull.multiply(0.12).add(swirl).setY(-0.1));
-                    p.setRemainingAir(Math.max(-19, p.getRemainingAir() - 40));
-                    if (k % 10 == 0) p.damage(dmg(2), m);
+                    p.setVelocity(pull.multiply(0.05).add(swirl.multiply(0.5)).setY(p.getVelocity().getY()));
+                    p.setRemainingAir(Math.max(0, p.getRemainingAir() - 15));
+                    if (k % 15 == 0) p.damage(dmg(2), m);
                 }
-            }, i);
+            }, i + 20L);
         }
     }
 
@@ -516,7 +531,7 @@ public class ZombieApocalypse extends Disaster {
             for (Entity e : world.getNearbyEntities(l, 3, 3, 3)) {
                 if (!(e instanceof Player p)) continue;
                 p.damage(dmg(4), m);
-                p.setVelocity(dir.clone().multiply(1.4).setY(1.1));
+                p.setVelocity(dir.clone().multiply(0.6).setY(0.5));
             }
         }).launch(plugin);
     }
@@ -539,10 +554,10 @@ public class ZombieApocalypse extends Disaster {
                     if (!(e instanceof Player p)) continue;
                     Vector v = p.getLocation().toVector().subtract(c.toVector());
                     Vector swirl = new Vector(-v.getZ(), 0, v.getX()).normalize().multiply(0.5);
-                    p.setVelocity(swirl.setY(0.55));
+                    p.setVelocity(swirl.multiply(0.5).setY(0.25));
                 }
                 if (k == 36) for (Entity e : world.getNearbyEntities(c, 5, 10, 5))
-                    if (e instanceof Player p) { p.setVelocity(p.getLocation().toVector().subtract(c.toVector()).normalize().multiply(1.8).setY(0.6)); p.damage(dmg(4), m); }
+                    if (e instanceof Player p) { p.setVelocity(p.getLocation().toVector().subtract(c.toVector()).normalize().multiply(0.8).setY(0.4)); p.damage(dmg(4), m); }
             }, i);
         }
     }
@@ -552,6 +567,11 @@ public class ZombieApocalypse extends Disaster {
     private void groundSlam(Mob m) {
         Location c = m.getLocation();
         m.setVelocity(new Vector(0, 0.8, 0));
+        FX.sound(c, Sound.ENTITY_WARDEN_ATTACK_IMPACT, 1f, 0.6f);
+        for (int i = 0; i < 12; i += 2) {
+            final double grow = 2 + i * 0.5;
+            plugin.getServer().getScheduler().runTaskLater(plugin, () -> FX.telegraph(c, grow, FX.dust(160, 110, 50, 1.2f)), i);
+        }
         plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
             if (!m.isValid()) return;
             Location g = m.getLocation();
@@ -573,8 +593,8 @@ public class ZombieApocalypse extends Disaster {
                         double d = p.getLocation().distance(g);
                         if (d > rad - 1 && d <= rad && p.isOnGround()) {
                             p.damage(dmg(7), m);
-                            p.setVelocity(new Vector(0, 1.0, 0).add(p.getLocation().toVector().subtract(g.toVector()).normalize().multiply(0.6)));
-                            FX.shake(p, 4);
+                            p.setVelocity(new Vector(0, 0.45, 0).add(p.getLocation().toVector().subtract(g.toVector()).normalize().multiply(0.3)));
+                            FX.shake(p, 2);
                         }
                     }
                 }, r * 2L);
@@ -586,20 +606,20 @@ public class ZombieApocalypse extends Disaster {
         FX.sound(m.getLocation(), Sound.BLOCK_STONE_BREAK, 2f, 0.5f);
         Location start = eye(m).add(0, 1.2, 0);
         new Bolt(start, t.getLocation().add(0, 1, 0).toVector().subtract(start.toVector()), 1.0, 50, 1.4, m, l -> {
-            world.spawnParticle(Particle.BLOCK, l, 8, 0.35, 0.35, 0.35, 0, Material.COBBLESTONE.createBlockData());
-            world.spawnParticle(Particle.DUST, l, 3, 0.3, 0.3, 0.3, 0, FX.dust(100, 90, 80, 2.2f));
+            world.spawnParticle(Particle.BLOCK, l, 2, 0.2, 0.2, 0.2, 0, Material.COBBLESTONE.createBlockData());
+            world.spawnParticle(Particle.DUST, l, 1, 0, 0, 0, 0, FX.dust(140, 110, 70, 2.5f));
         }, (l, hit) -> {
-            world.spawnParticle(Particle.BLOCK, l, 120, 1, 1, 1, 0, Material.COBBLESTONE.createBlockData());
-            world.spawnParticle(Particle.EXPLOSION, l, 1, 0, 0, 0, 0);
+            world.spawnParticle(Particle.BLOCK, l, 50, 0.5, 0.5, 0.5, 0, Material.COBBLESTONE.createBlockData());
+            FX.ring(l, 1.5, Particle.DUST, 20, FX.dust(140, 110, 70, 1.4f));
             FX.sound(l, Sound.BLOCK_STONE_BREAK, 2f, 0.4f);
             FX.sound(l, Sound.ENTITY_GENERIC_EXPLODE, 1f, 0.8f);
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < 3; i++)
                 FX.debris(l.clone().add(0, 0.5, 0), Material.COBBLESTONE.createBlockData(), new Vector(rnd(-0.3, 0.3), rnd(0.3, 0.6), rnd(-0.3, 0.3)), true);
             for (Entity e : world.getNearbyEntities(l, 2.5, 2.5, 2.5)) {
                 if (!(e instanceof Player p)) continue;
                 p.damage(dmg(8), m);
-                p.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 60, 2));
-                FX.shake(p, 3);
+                p.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 40, 0));
+                FX.shake(p, 1.5);
             }
         }).launch(plugin);
     }
@@ -609,19 +629,27 @@ public class ZombieApocalypse extends Disaster {
     private void chainLightning(Mob m, Player first) {
         FX.sound(m.getLocation(), Sound.ENTITY_EVOKER_CAST_SPELL, 1.5f, 1.4f);
         windup(m, Particle.ELECTRIC_SPARK, null);
+        for (int i = 0; i < 16; i += 2) {
+            plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                if (!first.isValid()) return;
+                FX.telegraph(first.getLocation(), 1.2, FX.dust(255, 240, 80, 1f));
+                world.spawnParticle(Particle.ELECTRIC_SPARK, m.getEyeLocation(), 6, 0.3, 0.3, 0.3, 0.05);
+            }, i);
+        }
         plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
             if (!m.isValid() || !first.isValid()) return;
             List<Player> hit = new ArrayList<>();
             Location from = eye(m);
             Player cur = first;
-            int jumps = 1 + level / 2;
+            int jumps = level >= 4 ? 2 : 1;
             for (int j = 0; j < jumps && cur != null; j++) {
+                if (m.getLocation().distance(cur.getLocation()) > 24 && j == 0) break;
                 Location to = cur.getLocation().add(0, 1, 0);
                 arc(from, to);
                 world.strikeLightningEffect(cur.getLocation());
                 cur.damage(dmg(6) * (1 - j * 0.2), m);
-                cur.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 30, 3));
-                FX.shake(cur, 3);
+                cur.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 20, 0));
+                FX.shake(cur, 1.5);
                 hit.add(cur);
                 from = to;
                 Player nxt = null;
@@ -629,7 +657,7 @@ public class ZombieApocalypse extends Disaster {
                     if (e instanceof Player p && !hit.contains(p)) { nxt = p; break; }
                 cur = nxt;
             }
-        }, 10L);
+        }, 16L);
     }
 
     /** Jagged electric arc between two points. */

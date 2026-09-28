@@ -74,6 +74,7 @@ public class DisasterCommand implements TabExecutor {
             }
             case "reload" -> {
                 plugin.reloadConfig();
+                com.vextio.disasters.util.FX.shakeScale = plugin.getConfig().getDouble("screen-shake", 0.35);
                 m.startRandomScheduler();
                 s.sendMessage("§aConfig reloaded.");
             }

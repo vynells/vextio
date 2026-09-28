@@ -179,7 +179,7 @@ public class MeteorShower extends Disaster {
             if (!(e instanceof LivingEntity le)) continue;
             Vector push = e.getLocation().toVector().subtract(l.toVector());
             double dist = Math.max(1, push.length());
-            double f = (1 - dist / shockR) * (0.8 + size * 0.35);
+            double f = (1 - dist / shockR) * (0.5 + size * 0.2);
             if (f <= 0) continue;
             le.setVelocity(push.normalize().multiply(f).setY(0.35 + f * 0.3));
             le.setFireTicks(Math.max(le.getFireTicks(), (int) (40 * f)));
