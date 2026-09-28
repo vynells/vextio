@@ -1,0 +1,59 @@
+# ============ NaturalDisasters ============
+random:
+  enabled: true
+  # Seconds between random disaster rolls
+  min-interval: 900
+  max-interval: 2400
+  # Chance (0-1) a roll actually spawns a disaster
+  chance: 0.6
+  min-level: 1
+  max-level: 5
+  # Disaster types allowed randomly
+  types: [EARTHQUAKE, METEOR_SHOWER, BLIZZARD, DROUGHT, TSUNAMI, FLOOD]
+
+# Worlds where disasters never happen
+disabled-worlds: [world_the_end]
+
+# Max simultaneous disasters
+max-active: 3
+
+# Max blocks changed per tick (water filling / draining). Lower = less lag.
+block-budget-per-tick: 4000
+
+# Protect blocks with inventories / tile entities (chests, furnaces, signs...)
+protect-containers: true
+
+earthquake:
+  countdown-seconds: 10
+  radius: 60
+  base-duration-seconds: 12
+  # Allow structural damage (glass shatters, man-made blocks crumble)
+  structure-damage: true
+  fissures: true
+
+meteor-shower:
+  radius: 70
+  base-duration-seconds: 30
+  block-damage: true
+
+blizzard:
+  radius: 90
+  base-duration-seconds: 90
+  snow-accumulation: true
+  freeze-water: true
+
+drought:
+  radius: 80
+  base-duration-seconds: 120
+  evaporate-water: true
+  kill-plants: true
+  wildfires: true
+
+tsunami:
+  warning-seconds: 12
+  # Water drains away this many seconds after the wave settles (-1 = never, water stays forever)
+  recede-after-seconds: 90
+
+flood:
+  radius-base: 35
+  recede-after-seconds: 90

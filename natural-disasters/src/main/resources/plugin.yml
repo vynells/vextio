@@ -1,0 +1,18 @@
+name: NaturalDisasters
+version: '${project.version}'
+main: com.vextio.disasters.NaturalDisasters
+api-version: '1.21'
+author: vextio
+description: Realistic natural disasters with a full GUI.
+commands:
+  disaster:
+    description: Natural disasters control
+    aliases: [nd, disasters]
+    usage: /disaster <gui|start|stop|random|list|reload>
+permissions:
+  disasters.admin:
+    description: Control disasters
+    default: op
+  disasters.bypass:
+    description: Never chosen as a random disaster target
+    default: false
