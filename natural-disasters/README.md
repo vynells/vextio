@@ -20,7 +20,7 @@ Jar: `target/NaturalDisasters-1.0.0.jar` → drop into your Paper 1.21.8 `plugin
 | `/disaster list` | Active disasters |
 | `/disaster reload` | Reload config |
 
-Types: `earthquake, meteor_shower, blizzard, drought, tsunami, flood`.
+Types: `earthquake, meteor_shower, blizzard, drought, tsunami, flood, zombie_apocalypse`.
 `disasters.bypass` — player is never picked as a random target.
 
 ## Disasters
@@ -32,3 +32,12 @@ Types: `earthquake, meteor_shower, blizzard, drought, tsunami, flood`.
 - **Flood** — torrential rain, lightning, water table rising block by block in low areas, currents dragging entities.
 
 Tsunami/Flood water recedes after `recede-after-seconds` (set `-1` to keep it forever). All placed water is tracked and removed cleanly. Tune lag with `block-budget-per-tick`.
+
+## Zombie Apocalypse
+Waves of elemental undead (waves = 2 + level). Each zombie has dyed armor, an element block on its head and an elemental aura:
+- **Pyromancer** (fire): fireballs, flame nova ring. Always on fire.
+- **Tidecaller** (water): water blast with huge knockback, drowning whirlpool.
+- **Stormwalker** (wind): wind blades that launch you, cyclone that lifts and flings.
+- **Stonebreaker** (earth): huge and tanky; ground slam shockwave, boulder throw.
+- **Voltbringer** (lightning): chain lightning that jumps between players.
+- **The Undying Warlord** (final wave boss): giant, glowing, casts every element, has a boss bar. Drops netherite + a totem.

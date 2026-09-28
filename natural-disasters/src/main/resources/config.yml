@@ -9,7 +9,7 @@ random:
   min-level: 1
   max-level: 5
   # Disaster types allowed randomly
-  types: [EARTHQUAKE, METEOR_SHOWER, BLIZZARD, DROUGHT, TSUNAMI, FLOOD]
+  types: [EARTHQUAKE, METEOR_SHOWER, BLIZZARD, DROUGHT, TSUNAMI, FLOOD, ZOMBIE_APOCALYPSE]
 
 # Worlds where disasters never happen
 disabled-worlds: [world_the_end]
@@ -57,3 +57,12 @@ tsunami:
 flood:
   radius-base: 35
   recede-after-seconds: 90
+
+zombie-apocalypse:
+  radius: 70
+  # waves = base-waves + level  (level 1 = 3 waves, level 5 = 7 waves)
+  base-waves: 2
+  warning-seconds: 10
+  break-seconds: 12
+  # A wave ends early after this long even if zombies remain
+  wave-timeout-seconds: 150

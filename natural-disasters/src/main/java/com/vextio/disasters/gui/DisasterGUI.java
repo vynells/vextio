@@ -46,7 +46,7 @@ public class DisasterGUI implements Listener {
         @Override public Inventory getInventory() { return inv; }
     }
 
-    private static final int[] TYPE_SLOTS = {19, 20, 21, 23, 24, 25};
+    private static final int[] TYPE_SLOTS = {19, 20, 21, 22, 23, 24, 25};
     private static final int[] LEVEL_SLOTS = {20, 21, 22, 23, 24};
     private static final Material[] LEVEL_ICONS = {Material.LIME_STAINED_GLASS_PANE, Material.YELLOW_STAINED_GLASS_PANE,
             Material.ORANGE_STAINED_GLASS_PANE, Material.RED_STAINED_GLASS_PANE, Material.PURPLE_STAINED_GLASS_PANE};
@@ -82,7 +82,7 @@ public class DisasterGUI implements Listener {
             if (running > 0) glow(it);
             inv.setItem(TYPE_SLOTS[i], it);
         }
-        inv.setItem(22, item(Material.ENDER_EYE, "§d§lRandom Disaster", "§7Pick a random disaster and", "§7a random player. Good luck.", "", "§e▸ Click to roll"));
+        inv.setItem(40, item(Material.ENDER_EYE, "§d§lRandom Disaster", "§7Pick a random disaster and", "§7a random player. Good luck.", "", "§e▸ Click to roll"));
 
         List<Disaster> active = plugin.getManager().getActive();
         List<String> lore = new ArrayList<>();
@@ -165,6 +165,8 @@ public class DisasterGUI implements Listener {
                         case 4 -> "+ wood, sand, dirt";
                         default -> "+ logs, bricks, stone";
                     }};
+            case ZOMBIE_APOCALYPSE -> new String[]{"§7Waves: §f" + (plugin.getConfig().getInt("zombie-apocalypse.base-waves", 2) + l),
+                    "§7Zombie power: §f+" + (l - 1) * 20 + "%", "§7Final wave: §4Undying Warlord boss"};
             case FLOOD -> new String[]{"§7Water rise: §f" + (3 + l * 2) + " blocks", "§7Area radius: §f" + (35 + l * 13)};
         };
     }
@@ -190,7 +192,7 @@ public class DisasterGUI implements Listener {
                 return;
             }
             switch (slot) {
-                case 22 -> { p.closeInventory(); String err = plugin.getManager().triggerRandom(); feedback(p, err, "§dThe dice have been rolled..."); }
+                case 40 -> { p.closeInventory(); String err = plugin.getManager().triggerRandom(); feedback(p, err, "§dThe dice have been rolled..."); }
                 case 48 -> { click(p); plugin.getManager().setRandomEnabled(!plugin.getManager().isRandomEnabled()); openMain(p); }
                 case 49 -> { int n = plugin.getManager().stopAll(false); p.sendMessage("§a✔ Stopped " + n + " disaster(s)."); click(p); openMain(p); }
                 default -> {}

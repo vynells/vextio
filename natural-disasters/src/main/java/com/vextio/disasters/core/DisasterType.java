@@ -19,7 +19,9 @@ public enum DisasterType {
     TSUNAMI("Tsunami", "§9", Material.HEART_OF_THE_SEA,
             "A towering wall of water.", "Rolls in from the horizon and", "drowns everything. Level = size."),
     FLOOD("Flood", "§3", Material.WATER_BUCKET,
-            "Torrential rain and rising water.", "Low ground fills up block", "by block as the rivers overflow.");
+            "Torrential rain and rising water.", "Low ground fills up block", "by block as the rivers overflow."),
+    ZOMBIE_APOCALYPSE("Zombie Apocalypse", "§4", Material.ZOMBIE_HEAD,
+            "Waves of elemental undead.", "Fire, water, wind, earth and", "lightning benders + a Warlord boss.");
 
     public final String display;
     public final String color;
@@ -43,6 +45,7 @@ public enum DisasterType {
             case DROUGHT -> new Drought(plugin, center, level);
             case TSUNAMI -> new Tsunami(plugin, center, level);
             case FLOOD -> new Flood(plugin, center, level);
+            case ZOMBIE_APOCALYPSE -> new com.vextio.disasters.disasters.apocalypse.ZombieApocalypse(plugin, center, level);
         };
     }
 
@@ -50,6 +53,7 @@ public enum DisasterType {
         if (s == null) return null;
         String k = s.toUpperCase(Locale.ROOT).replace('-', '_');
         if (k.equals("METEOR") || k.equals("METEORS")) k = "METEOR_SHOWER";
+        if (k.equals("ZOMBIES") || k.equals("APOCALYPSE") || k.equals("ZOMBIE")) k = "ZOMBIE_APOCALYPSE";
         try { return valueOf(k); } catch (IllegalArgumentException e) { return null; }
     }
 }
