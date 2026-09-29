@@ -1,0 +1,43 @@
+name: PowerGuard
+version: '${project.version}'
+main: dev.powerguard.PowerGuard
+api-version: '1.21'
+description: Teams and combat tagging in one plugin.
+softdepend: [Citizens]
+commands:
+  team:
+    description: Team commands. Run without arguments to open the team menu.
+    usage: /team [subcommand]
+    aliases: [t]
+    permission: powerguard.team
+  powerguard:
+    description: PowerGuard admin commands.
+    usage: /powerguard <reload|combat|untag|exempt|team>
+    aliases: [pg]
+    permission: powerguard.admin
+permissions:
+  powerguard.team:
+    description: Use /team and the team menu.
+    default: true
+  powerguard.team.create:
+    description: Create a team.
+    default: true
+  powerguard.team.chat:
+    description: Use team chat.
+    default: true
+  powerguard.bypass.commands:
+    description: Use blocked commands while in combat.
+    default: false
+  powerguard.bypass.cooldowns:
+    description: Ignore PowerGuard item cooldowns.
+    default: false
+  powerguard.bypass.warmup:
+    description: Team home/warp teleports are instant.
+    default: false
+  powerguard.admin:
+    description: All PowerGuard admin commands.
+    default: op
+    children:
+      powerguard.team: true
+      powerguard.team.create: true
+      powerguard.team.chat: true

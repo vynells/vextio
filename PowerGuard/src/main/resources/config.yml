@@ -1,0 +1,486 @@
+# ==========================================================
+#  PowerGuard - Teams + Combat Tag
+#  Colour codes use '&' (e.g. &a, &l). Hex colours: &#RRGGBB
+#  Apply changes live with /pg reload
+# ==========================================================
+
+# Players listed here always have full admin access (powerguard.admin), even without op.
+admins:
+  - Haidak
+
+# ----------------------------------------------------------
+#  TEAMS
+# ----------------------------------------------------------
+teams:
+  name-min-length: 3
+  name-max-length: 16
+  # Regex a team name must match.
+  name-pattern: '^[A-Za-z0-9_]+$'
+  max-members: 10
+  max-warps: 4
+  # Seconds before a /team invite expires.
+  invite-expire-seconds: 120
+  # Default colour for new teams. One of: black, dark_blue, dark_green, dark_aqua, dark_red,
+  # dark_purple, gold, gray, dark_gray, blue, green, aqua, red, light_purple, yellow, white
+  default-color: aqua
+  friendly-fire-default: false
+  # Size of the shared team ender chest in rows (1-6). Shrinking it never deletes items:
+  # items beyond the new size are kept in the save file and come back if you grow it again.
+  echest-rows: 3
+
+  teleport:
+    # Warm-up in seconds for /team home and /team warp. 0 = instant.
+    warmup-seconds: 3
+    cancel-on-move: true
+    cancel-on-damage: true
+    # How the countdown is shown: TITLE, ACTIONBAR or BOTH
+    countdown-display: TITLE
+
+  chat:
+    # Quick prefixes that send a single message to team chat (e.g. "@t hello" or "!hello").
+    prefixes:
+      - '@t '
+      - '!'
+    format: '&8[&bTeam&8] {color}{rank_symbol}{player}&7: &f{message}'
+    # Messages team members send are also shown to online admins with this permission.
+    spy-permission: 'powerguard.admin'
+
+  nametags:
+    # Show "[TAG] " before names in chat (display name).
+    chat: true
+    # Show "[TAG] " before names in the tab list.
+    tablist: true
+    format: '{color}[{team}] '
+
+  # Minimum rank needed for each action: OWNER, OFFICER or MEMBER.
+  # (Promote, demote, transfer and disband are always owner-only.)
+  rank-permissions:
+    invite: OFFICER
+    kick: OFFICER
+    sethome: OFFICER
+    home: MEMBER
+    setwarp: OFFICER
+    delwarp: OFFICER
+    warp: MEMBER
+    echest: MEMBER
+    rename: OWNER
+    friendlyfire: OFFICER
+    color: OFFICER
+
+  rank-symbols:
+    OWNER: '**'
+    OFFICER: '*'
+    MEMBER: ''
+
+# ----------------------------------------------------------
+#  COMBAT
+# ----------------------------------------------------------
+combat:
+  duration-seconds: 20
+  display:
+    actionbar: true
+    bossbar: true
+    bossbar-color: RED        # PINK, BLUE, RED, GREEN, YELLOW, PURPLE, WHITE
+    bossbar-style: PROGRESS   # PROGRESS, NOTCHED_6, NOTCHED_10, NOTCHED_12, NOTCHED_20
+  # Which damage tags a player. Turn individual sources off here.
+  tag-sources:
+    melee: true
+    projectiles: true        # arrows, tridents, snowballs, thrown potions, fireworks, wind charges...
+    explosions: true         # TNT, end crystals, respawn anchors, beds lit by a player
+    other: true              # anything else where a player is the damage source (e.g. Powers abilities)
+  # Seconds a respawn anchor / bed explosion is attributed to the player who clicked it.
+  explosion-attribution-seconds: 3
+  # Worlds where combat tagging is disabled.
+  disabled-worlds: []
+
+  commands:
+    # BLACKLIST = block the commands listed in 'blocked'.
+    # WHITELIST = block every command except those in 'allowed'.
+    mode: BLACKLIST
+    # Command names (no slash). Namespaced forms (minecraft:tp, essentials:home) and every alias of
+    # a listed command are blocked automatically. /team is always blocked in combat.
+    blocked:
+      - tp
+      - teleport
+      - tpa
+      - tpaccept
+      - tpyes
+      - tpahere
+      - tpask
+      - tpo
+      - tphere
+      - tpall
+      - tppos
+      - tpr
+      - tprandom
+      - rtp
+      - randomtp
+      - wild
+      - wilderness
+      - home
+      - homes
+      - sethome
+      - spawn
+      - warp
+      - warps
+      - back
+      - return
+      - top
+      - jump
+      - hub
+      - lobby
+      - enderchest
+      - ec
+      - echest
+    allowed:
+      - msg
+      - tell
+      - w
+      - r
+      - reply
+      - me
+      - list
+      - powerguard
+      - pg
+
+  logout:
+    # Kill players who disconnect while in combat.
+    kill: true
+    # Also kill on connection timeouts (lag). Kicks are never punished.
+    punish-timeouts: true
+    broadcast: true
+
+  # Item cooldowns (seconds). Shown with the vanilla item-cooldown overlay. 0 disables one.
+  cooldowns:
+    # true = cooldowns only apply while in combat. false = always apply.
+    only-in-combat: true
+    ender-pearl: 4
+    trident: 5
+    lunge: 4
+
+  restrictions:
+    block-elytra: false
+    block-chorus-fruit: false
+
+# ----------------------------------------------------------
+#  MESSAGES  ({prefix} is added to most messages automatically)
+# ----------------------------------------------------------
+messages:
+  prefix: '&8[&bPowerGuard&8] &r'
+  no-permission: '&cYou don''t have permission to do that.'
+  players-only: '&cOnly players can do that.'
+  player-not-found: '&cPlayer &f{player} &cnot found.'
+  reloaded: '&aConfig reloaded.'
+  unknown-subcommand: '&cUnknown subcommand. Use &f/team help&c.'
+
+  # Team
+  team-help:
+    - '&b&lTeam commands'
+    - '&f/team &7- open the team menu'
+    - '&f/team create <name> &7- create a team'
+    - '&f/team invite <player> &7- invite a player'
+    - '&f/team accept|deny [team] &7- answer an invite'
+    - '&f/team leave &7- leave your team'
+    - '&f/team kick <player> &7- kick a member'
+    - '&f/team promote|demote <player> &7- change ranks'
+    - '&f/team transfer <player> &7- give ownership away'
+    - '&f/team sethome &7| &f/team home'
+    - '&f/team setwarp|warp|delwarp <name> &7| &f/team warps'
+    - '&f/team echest &7- shared team ender chest'
+    - '&f/team info [team] &7| &f/team list'
+    - '&f/team chat &7- toggle team chat (or start a message with @t or !)'
+    - '&f/team rename <name> &7| &f/team friendlyfire <on|off> &7| &f/team color <colour>'
+    - '&f/team disband &7- delete your team'
+  usage: '&cUsage: &f{usage}'
+  not-in-team: '&cYou are not in a team.'
+  already-in-team: '&cYou are already in a team.'
+  target-already-in-team: '&c{player} is already in a team.'
+  target-not-in-your-team: '&c{player} is not in your team.'
+  team-not-found: '&cTeam &f{team} &cnot found.'
+  team-name-taken: '&cA team called &f{team} &calready exists.'
+  team-name-invalid: '&cTeam names must be {min}-{max} characters: letters, numbers and _.'
+  team-created: '&aCreated team {color}{team}&a.'
+  team-disband-confirm: '&cType &f/team disband confirm &cwithin 15s to delete {color}{team}&c. Ender chest items go to the owner.'
+  team-disbanded: '&c{color}{team} &chas been disbanded.'
+  team-renamed: '&aTeam renamed to {color}{team}&a.'
+  team-full: '&cThe team is full ({max} members).'
+  rank-too-low: '&cYour rank is too low. Required: &f{rank}&c.'
+  owner-only: '&cOnly the team owner can do that.'
+  owner-cannot-leave: '&cTransfer ownership or disband the team before leaving.'
+  left-team: '&eYou left {color}{team}&e.'
+  member-left: '&e{player} left the team.'
+  member-joined: '&a{player} joined the team!'
+  kicked: '&cYou were kicked from {color}{team}&c.'
+  member-kicked: '&e{player} was kicked from the team.'
+  cannot-target-self: '&cYou can''t do that to yourself.'
+  cannot-kick-rank: '&cYou can only kick members ranked below you.'
+  promoted: '&a{player} is now an &fOfficer&a.'
+  already-officer: '&c{player} is already an Officer.'
+  demoted: '&e{player} is now a &fMember&e.'
+  not-officer: '&c{player} is not an Officer.'
+  transferred: '&a{player} is now the team owner.'
+  invite-sent: '&aInvited {player} to the team. The invite expires in {seconds}s.'
+  invite-received: '&a{inviter} invited you to {color}{team}&a. &f/team accept {team} &7or &f/team deny {team}'
+  invite-already: '&c{player} already has an invite from your team.'
+  invite-none: '&cYou have no pending invites.'
+  invite-specify: '&cYou have several invites, specify one: &f{teams}'
+  invite-denied: '&eYou declined the invite from {color}{team}&e.'
+  invite-denied-team: '&e{player} declined the team invite.'
+  invite-expired: '&7Your invite to {color}{team} &7expired.'
+  invite-cancelled: '&eInvite to {player} cancelled.'
+  home-set: '&aTeam home set.'
+  home-not-set: '&cYour team has no home. Use &f/team sethome&c.'
+  warp-set: '&aWarp &f{warp} &aset.'
+  warp-deleted: '&eWarp &f{warp} &edeleted.'
+  warp-not-found: '&cWarp &f{warp} &cnot found.'
+  warp-limit: '&cYour team has reached the warp limit ({max}).'
+  warp-name-invalid: '&cWarp names must be 1-16 characters: letters, numbers and _.'
+  warps-list: '&bTeam warps: &f{warps}'
+  warps-none: '&7Your team has no warps.'
+  teleport-warmup: '&eTeleporting in {seconds}s. Don''t move!'
+  teleport-cancelled-move: '&cTeleport cancelled: you moved.'
+  teleport-cancelled-damage: '&cTeleport cancelled: you took damage.'
+  teleport-cancelled-combat: '&cTeleport cancelled: you entered combat.'
+  teleport-done: '&aTeleported.'
+  location-world-missing: '&cThat location''s world (&f{world}&c) isn''t loaded.'
+  teleport-countdown-title: '&bTeleporting'
+  teleport-countdown-subtitle: '&fin &e{seconds}s'
+  teleport-countdown-actionbar: '&bTeleporting in &e{seconds}s &7- don''t move'
+  friendly-fire-set: '&eFriendly fire is now {state}&e.'
+  color-set: '&aTeam colour set to {color}{colorname}&a.'
+  state-on: '&aON'
+  state-off: '&cOFF'
+  team-chat-on: '&aTeam chat enabled. Your messages go to your team only.'
+  team-chat-off: '&eTeam chat disabled.'
+  team-list-header: '&b&lTeams &7({count})'
+  team-list-entry: '&8- {color}{team} &7({online}/{size} online)'
+  team-info:
+    - '&8&m                              '
+    - '{color}&l{team}'
+    - '&7Owner: &f{owner}'
+    - '&7Members: &f{online}&7/&f{size} online'
+    - '&7Officers: &f{officers}'
+    - '&7Members: &f{members}'
+    - '&7Friendly fire: {ff}'
+    - '&7Home: &f{home}'
+    - '&7Warps: &f{warps}'
+    - '&8&m                              '
+  prompt-cancel-hint: '&7Type &fcancel &7to cancel.'
+  prompt-team-name: '&bType the new team name in chat.'
+  prompt-warp-name: '&bType a name for the warp in chat.'
+  prompt-cancelled: '&7Cancelled.'
+
+  # Combat
+  combat-enter: '&cYou are now in combat! &7Don''t log out for {seconds}s.'
+  combat-leave: '&aYou are no longer in combat.'
+  combat-actionbar: '&cIn combat &8| &f{seconds}s'
+  combat-bossbar: '&cCombat &8- &f{seconds}s'
+  combat-command-blocked: '&cYou can''t use &f/{command} &cwhile in combat.'
+  combat-team-blocked: '&cYou can''t use team features while in combat.'
+  combat-logout-broadcast: '&c{player} logged out in combat and died!'
+  combat-elytra-blocked: '&cYou can''t use an Elytra while in combat.'
+  combat-chorus-blocked: '&cYou can''t eat Chorus Fruit while in combat.'
+  cooldown-active: '&cWait &f{seconds}s &cbefore using that again.'
+
+  # Admin
+  admin-help:
+    - '&b&lPowerGuard admin'
+    - '&f/pg reload'
+    - '&f/pg combat <player> &7- show combat status'
+    - '&f/pg untag <player> &7- remove combat tag'
+    - '&f/pg exempt <player> &7- toggle combat exemption'
+    - '&f/pg team <name> info|disband|kick <player>'
+  admin-combat-status: '&f{player}&7: {status}'
+  admin-combat-in: '&cin combat &7({seconds}s left, opponents: &f{opponents}&7)'
+  admin-combat-out: '&anot in combat'
+  admin-combat-exempt: '&e(exempt from tagging)'
+  admin-untagged: '&aRemoved the combat tag from {player}.'
+  admin-exempt-on: '&a{player} is now exempt from combat tagging.'
+  admin-exempt-off: '&e{player} is no longer exempt from combat tagging.'
+  admin-team-disbanded: '&aDisbanded team {team}.'
+  admin-team-kicked: '&aKicked {player} from {team}.'
+  admin-cannot-kick-owner: '&cThat player owns the team. Disband it instead.'
+
+# ----------------------------------------------------------
+#  GUI
+#  Item names/lore support placeholders shown per item. Italics are removed automatically.
+# ----------------------------------------------------------
+gui:
+  # Sound keys (namespaced, e.g. minecraft:ui.button.click). Empty = silent.
+  click-sound: 'minecraft:ui.button.click'
+  error-sound: 'minecraft:entity.villager.no'
+  success-sound: 'minecraft:entity.experience_orb.pickup'
+  filler: GRAY_STAINED_GLASS_PANE
+  border: BLACK_STAINED_GLASS_PANE
+  titles:
+    main: '&8Team &7» {color}{team}'
+    no-team: '&8Teams'
+    warps: '&8Team Warps'
+    members: '&8Team Members'
+    member: '&8Member &7» &f{player}'
+    invites: '&8Team Invites'
+    invite-player: '&8Invite a Player'
+    received-invites: '&8Your Invites'
+    settings: '&8Team Settings'
+    color: '&8Team Colour'
+    confirm: '&8Are you sure?'
+  items:
+    overview:
+      material: WHITE_BANNER
+      name: '{color}&l{team}'
+      lore:
+        - '&7Owner: &f{owner}'
+        - '&7Colour: {color}{colorname}'
+        - '&7Online: &a{online}&7/&f{size}'
+        - '&7Friendly fire: {ff}'
+    home:
+      material: RED_BED
+      name: '&bTeam Home'
+      lore:
+        - '&7{home}'
+        - ''
+        - '&eClick &7to teleport'
+        - '&eShift-click &7to set it here (Officer+)'
+    warps:
+      material: ENDER_PEARL
+      name: '&bWarps'
+      lore:
+        - '&7{count}&8/&7{max} warps'
+        - '&eClick &7to open'
+    members:
+      material: PLAYER_HEAD
+      name: '&bMembers'
+      lore:
+        - '&7{online}&8/&7{size} online'
+        - '&eClick &7to manage'
+    invites:
+      material: WRITABLE_BOOK
+      name: '&bInvites'
+      lore:
+        - '&7{count} pending'
+        - '&eClick &7to open'
+    settings:
+      material: COMPARATOR
+      name: '&bSettings'
+      lore:
+        - '&eClick &7to open'
+    echest:
+      material: ENDER_CHEST
+      name: '&bTeam Ender Chest'
+      lore:
+        - '&7Shared storage for your team'
+        - '&eClick &7to open'
+    chat:
+      material: OAK_SIGN
+      name: '&bTeam Chat: {state}'
+      lore:
+        - '&eClick &7to toggle'
+    leave:
+      material: IRON_DOOR
+      name: '&cLeave Team'
+      lore:
+        - '&eClick &7to leave'
+    back:
+      material: ARROW
+      name: '&7Back'
+    close:
+      material: BARRIER
+      name: '&cClose'
+    warp:
+      material: ENDER_EYE
+      name: '&b{warp}'
+      lore:
+        - '&7{location}'
+        - ''
+        - '&eClick &7to teleport'
+        - '&eShift-click &7to delete (Officer+)'
+    warp-empty:
+      material: LIME_STAINED_GLASS_PANE
+      name: '&aSet warp here'
+      lore:
+        - '&7Saves your current position'
+        - '&eClick &7and type a name'
+    member:
+      name: '{rankcolor}{player}'
+      lore:
+        - '&7Rank: &f{rank}'
+        - '&7Status: {status}'
+        - ''
+        - '&eClick &7to manage'
+    promote:
+      material: LIME_DYE
+      name: '&aPromote to Officer'
+    demote:
+      material: ORANGE_DYE
+      name: '&6Demote to Member'
+    transfer:
+      material: GOLDEN_HELMET
+      name: '&eTransfer Ownership'
+      lore:
+        - '&7Makes this player the owner'
+    kick:
+      material: RED_DYE
+      name: '&cKick from Team'
+    invite-button:
+      material: EMERALD
+      name: '&aInvite a Player'
+      lore:
+        - '&7Online players without a team'
+    pending-invite:
+      name: '&f{player}'
+      lore:
+        - '&7Expires in &f{seconds}s'
+        - '&eClick &7to cancel'
+    invite-target:
+      name: '&f{player}'
+      lore:
+        - '&eClick &7to invite'
+    friendly-fire:
+      material: IRON_SWORD
+      name: '&bFriendly Fire: {state}'
+      lore:
+        - '&eClick &7to toggle'
+    color:
+      material: LEATHER_CHESTPLATE
+      name: '&bTeam Colour: {color}{colorname}'
+      lore:
+        - '&eClick &7to pick'
+    rename:
+      material: NAME_TAG
+      name: '&bRename Team'
+      lore:
+        - '&eClick &7and type a new name'
+    disband:
+      material: TNT
+      name: '&cDisband Team'
+      lore:
+        - '&7This cannot be undone'
+    create:
+      material: NETHER_STAR
+      name: '&aCreate a Team'
+      lore:
+        - '&eClick &7and type a name'
+    received-invites:
+      material: WRITABLE_BOOK
+      name: '&bPending Invites'
+      lore:
+        - '&7{count} pending'
+    received-invite:
+      material: PAPER
+      name: '{color}{team}'
+      lore:
+        - '&7Expires in &f{seconds}s'
+        - '&eLeft-click &7to accept'
+        - '&eRight-click &7to decline'
+    team-list:
+      material: BOOK
+      name: '&bAll Teams'
+      lore:
+        - '&7{count} teams exist'
+        - '&7Use &f/team list'
+    confirm:
+      material: LIME_CONCRETE
+      name: '&aConfirm'
+    cancel:
+      material: RED_CONCRETE
+      name: '&cCancel'
