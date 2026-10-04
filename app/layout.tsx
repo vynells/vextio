@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Anton, Playfair_Display, DM_Sans } from "next/font/google";
+import { Anton, DM_Sans } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/components/CartContext";
 import { EditModeProvider } from "@/components/EditModeContext";
@@ -11,12 +11,6 @@ const anton = Anton({
   variable: "--font-anton",
 });
 
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  weight: ["400", "700", "900"],
-  variable: "--font-playfair",
-});
-
 const dmSans = DM_Sans({
   subsets: ["latin"],
   weight: ["300", "400", "500"],
@@ -24,9 +18,9 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Vextio — Vintage Inspired Clothing",
+  title: "Vextio — Punk & Y2K Clothing",
   description:
-    "Timeless silhouettes reborn for the modern wardrobe. Heritage fabrics, handcrafted pieces, small batch production.",
+    "Small-batch punk and Y2K clothing from Pakistan. Cash on delivery nationwide.",
 };
 
 export default function RootLayout({
@@ -37,7 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${anton.variable} ${playfair.variable} ${dmSans.variable} font-body bg-cream text-brown antialiased`}
+        className={`${anton.variable} ${dmSans.variable} font-body bg-cream text-brown antialiased`}
       >
         <EditModeProvider>
           <CartProvider>

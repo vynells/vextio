@@ -259,7 +259,7 @@ export default function CheckoutPage() {
         <button
           type="submit"
           disabled={items.length === 0 || submitting}
-          className="w-full bg-rust px-6 py-4 text-[13px] font-medium uppercase tracking-[0.12em] text-cream transition-colors hover:bg-[#7a3418] disabled:cursor-not-allowed disabled:opacity-40"
+          className="btn-punk w-full"
         >
           {submitting ? "Placing order..." : `Place order — ${PAYMENT_LABELS[payment]}`}
         </button>

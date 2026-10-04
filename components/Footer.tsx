@@ -24,21 +24,21 @@ const columns = [
 
 export default function Footer() {
   return (
-    <footer className="border-t border-cream/10 bg-brown px-6 pb-8 pt-12 md:px-10">
-      <div className="mb-12 grid grid-cols-1 gap-10 sm:grid-cols-2 md:grid-cols-[2fr_1fr_1fr_1fr]">
+    <footer className="relative overflow-hidden border-t-2 border-rust bg-cream px-6 pb-8 pt-14 md:px-10">
+      <div className="relative z-10 mb-12 grid grid-cols-1 gap-10 sm:grid-cols-2 md:grid-cols-[2fr_1fr_1fr_1fr]">
         <div>
           <EditableText
             contentKey="footer_brand_name"
             defaultValue="Vextio"
             as="p"
-            className="mb-4 font-display text-xl font-black uppercase tracking-[0.12em] text-cream"
+            className="mb-4 font-display text-2xl uppercase tracking-[0.12em] text-brown"
           />
           <EditableText
             contentKey="footer_tagline"
             defaultValue="Vintage-inspired clothing made in small batches. Designed to last, made to be worn."
             as="p"
             multiline
-            className="max-w-[220px] text-[13px] font-light leading-relaxed text-cream/45"
+            className="max-w-[220px] text-[13px] font-light leading-relaxed text-brown/50"
           />
         </div>
 
@@ -51,7 +51,7 @@ export default function Footer() {
               <Link
                 key={link.label}
                 href={link.href}
-                className="mb-2.5 block text-[13px] font-light text-cream/50 transition-colors hover:text-cream"
+                className="mb-2.5 block text-[13px] font-light text-brown/55 transition-colors hover:text-brown"
               >
                 {link.label}
               </Link>
@@ -65,7 +65,7 @@ export default function Footer() {
           </h4>
           <Link
             href="/help"
-            className="mb-2.5 block text-[13px] font-light text-cream/50 transition-colors hover:text-cream"
+            className="mb-2.5 block text-[13px] font-light text-brown/55 transition-colors hover:text-brown"
           >
             Help & Support
           </Link>
@@ -73,13 +73,13 @@ export default function Footer() {
             href="https://wa.me/923340927688"
             target="_blank"
             rel="noopener noreferrer"
-            className="mb-2.5 block text-[13px] font-light text-cream/50 transition-colors hover:text-cream"
+            className="mb-2.5 block text-[13px] font-light text-brown/55 transition-colors hover:text-brown"
           >
             WhatsApp us
           </a>
           <a
             href="mailto:help@blackoutmc.xyz"
-            className="mb-2.5 block text-[13px] font-light text-cream/50 transition-colors hover:text-cream"
+            className="mb-2.5 block text-[13px] font-light text-brown/55 transition-colors hover:text-brown"
           >
             help@blackoutmc.xyz
           </a>
@@ -93,23 +93,30 @@ export default function Footer() {
             contentKey="footer_address"
             defaultValue="Islamabad, Pakistan"
             as="p"
-            className="mb-2.5 text-[13px] font-light text-cream/50"
+            className="mb-2.5 text-[13px] font-light text-brown/55"
           />
           <EditableText
             contentKey="footer_phone"
             defaultValue="03340927688"
             as="p"
-            className="mb-2.5 text-[13px] font-light text-cream/50"
+            className="mb-2.5 text-[13px] font-light text-brown/55"
           />
         </div>
       </div>
 
-      <div className="flex flex-col items-center justify-center gap-4 border-t border-cream/10 pt-6">
+      <p
+        aria-hidden="true"
+        className="pointer-events-none select-none text-center font-display text-[26vw] uppercase leading-[0.8] tracking-[0.02em] text-brown/[0.05] md:text-[17vw]"
+      >
+        Vextio
+      </p>
+
+      <div className="relative z-10 flex flex-col items-center justify-center gap-4 border-t border-brown/10 pt-6">
         <EditableText
           contentKey="footer_copyright"
           defaultValue="© 2024 Vextio. All rights reserved."
           as="p"
-          className="text-[12px] text-cream/30"
+          className="text-[12px] text-brown/35"
         />
       </div>
     </footer>

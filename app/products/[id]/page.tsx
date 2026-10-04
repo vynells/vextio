@@ -139,8 +139,8 @@ export default function ProductDetailPage() {
 
             {product.badge && (
               <span
-                className={`absolute left-3 top-3 z-10 px-2 py-1 text-[10px] font-medium uppercase tracking-[0.12em] ${
-                  product.badge === "Ltd." ? "bg-gold text-brown" : "bg-rust text-cream"
+                className={`sticker absolute left-3 top-3 z-10 ${
+                  product.badge === "Ltd." ? "bg-gold text-cream" : "bg-rust text-brown"
                 }`}
               >
                 {product.badge}
@@ -194,7 +194,7 @@ export default function ProductDetailPage() {
             <h1 className="mb-3 font-display text-[2rem] font-bold text-brown md:text-[2.4rem]">
               {product.name}
             </h1>
-            <p className="mb-1 font-legal text-xl font-bold text-brown">{product.price}</p>
+            <p className="mb-1 font-legal text-2xl tracking-[0.03em] text-brown">{product.price}</p>
 
             {selectedSize && (
               <p
@@ -268,7 +268,7 @@ export default function ProductDetailPage() {
               type="button"
               onClick={handleAddToCart}
               disabled={needsSizeSelection}
-              className="w-full bg-rust px-6 py-4 text-[13px] font-medium uppercase tracking-[0.12em] text-cream transition-colors hover:bg-[#7a3418] disabled:cursor-not-allowed disabled:opacity-40"
+              className="btn-punk w-full"
             >
               {added ? "Added to cart" : needsSizeSelection ? "Select a size" : "Add to cart"}
             </button>

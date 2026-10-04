@@ -27,7 +27,7 @@ export default function Hero() {
         </div>
 
         <div className="vx-rise mt-2 flex flex-col items-center">
-          <Link href="/products" className="vx-cta mt-6">
+          <Link href="/products" className="btn-punk mt-6 px-8 text-xl">
             Shop the collection
           </Link>
         </div>
@@ -64,23 +64,6 @@ export default function Hero() {
         .vx-split-lime { background: #9CB832; animation: vx-intro-l 750ms ease-out both, vx-glitch-l 7s steps(1) 2.2s infinite; }
 
         .vx-rise { animation: vx-fade 600ms ease-out 650ms both; }
-
-        .vx-cta {
-          display: inline-block;
-          background: #C23B3B;
-          color: #EDEBE6;
-          font-family: var(--font-anton), Impact, sans-serif;
-          font-size: 1.25rem;
-          text-transform: uppercase;
-          letter-spacing: 0.04em;
-          padding: 0.85rem 2.1rem;
-          box-shadow: 6px 6px 0 #9CB832;
-          transition: transform 120ms ease, box-shadow 120ms ease;
-        }
-        .vx-cta:hover { transform: translate(3px, 3px); box-shadow: 3px 3px 0 #9CB832; }
-        .vx-cta:active { transform: translate(6px, 6px); box-shadow: 0 0 0 #9CB832; }
-        .vx-cta:focus-visible { outline: 2px solid #EDEBE6; outline-offset: 5px; }
-
 
         @keyframes vx-slam {
           0%   { opacity: 0; transform: scale(1.4) rotate(-3deg); filter: blur(8px); }

@@ -42,7 +42,7 @@ export default function Nav() {
             <li key={link.label}>
               <Link
                 href={link.href}
-                className="text-[13px] font-medium uppercase tracking-[0.1em] text-muted transition-colors hover:text-brown"
+                className="text-[13px] font-medium uppercase tracking-[0.1em] text-muted decoration-rust decoration-2 underline-offset-[7px] transition-colors hover:text-brown hover:underline"
               >
                 {link.label}
               </Link>
@@ -54,7 +54,7 @@ export default function Nav() {
           <button
             type="button"
             onClick={openCart}
-            className="border border-brown px-5 py-2 text-[13px] font-medium uppercase tracking-[0.1em] text-brown transition-colors hover:bg-brown hover:text-cream"
+            className="border border-brown px-5 py-2 text-[13px] font-medium uppercase tracking-[0.1em] text-brown transition-[color,background-color,box-shadow] hover:bg-brown hover:text-cream hover:shadow-[3px_3px_0_#C23B3B]"
           >
             Cart ({count})
           </button>
@@ -100,7 +100,7 @@ export default function Nav() {
           }`}
         >
           <div className="mb-8 flex items-center justify-between">
-            <h3 className="font-display text-xl font-bold text-brown">
+            <h3 className="font-display text-2xl uppercase tracking-[0.03em] text-brown">
               Your cart
             </h3>
             <button
@@ -192,7 +192,7 @@ export default function Nav() {
           <div className="mt-auto pt-6">
             <Link
               href="/checkout"
-              className={`block w-full bg-rust px-6 py-3.5 text-center text-[12px] font-medium uppercase tracking-[0.12em] text-cream transition-colors hover:bg-[#7a3418] ${
+              className={`btn-punk w-full ${
                 count === 0 ? "pointer-events-none opacity-40" : ""
               }`}
             >

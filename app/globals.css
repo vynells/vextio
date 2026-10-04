@@ -29,3 +29,53 @@ body::before {
 a, button {
   letter-spacing: 0.02em;
 }
+
+/* ---------- Vextio punk / Y2K finishing ---------- */
+::selection { background: #C23B3B; color: #EDEBE6; }
+:focus-visible { outline: 2px solid #9CB832; outline-offset: 3px; }
+html { scrollbar-color: #C23B3B #0A0A0A; scrollbar-width: thin; }
+.font-display, .font-legal { font-synthesis: none; }
+
+@layer components {
+  /* Signature button: red slab with a hard offset shadow that presses in. */
+  .btn-punk {
+    --btn-shadow: #9CB832;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #C23B3B;
+    color: #EDEBE6;
+    font-family: var(--font-anton), Impact, sans-serif;
+    font-size: 1.05rem;
+    line-height: 1.2;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.9rem 1.75rem;
+    box-shadow: 5px 5px 0 var(--btn-shadow);
+    transition: transform 120ms ease, box-shadow 120ms ease, opacity 150ms ease;
+  }
+  .btn-punk:hover { transform: translate(2px, 2px); box-shadow: 3px 3px 0 var(--btn-shadow); }
+  .btn-punk:active { transform: translate(5px, 5px); box-shadow: 0 0 0 var(--btn-shadow); }
+  .btn-punk:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: 5px 5px 0 var(--btn-shadow); }
+
+  /* Outlined variant for secondary actions. */
+  .btn-punk-ghost {
+    --btn-shadow: #C23B3B;
+    background: transparent;
+    color: #EDEBE6;
+    border: 2px solid #EDEBE6;
+  }
+
+  /* Slightly tilted sticker for product badges. */
+  .sticker {
+    display: inline-block;
+    transform: rotate(-4deg);
+    font-family: var(--font-anton), Impact, sans-serif;
+    font-size: 12px;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.4rem 0.6rem;
+    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.55);
+  }
+}

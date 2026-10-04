@@ -3,7 +3,7 @@ export default function VextioLoader() {
 
   return (
     <div className="flex min-h-[40vh] items-center justify-center">
-      <div className="flex font-display text-[1.6rem] font-black uppercase tracking-[0.15em] text-brown">
+      <div className="flex font-display text-[1.6rem] uppercase tracking-[0.15em] text-brown">
         {letters.map((letter, i) => (
           <span
             key={i}
@@ -28,7 +28,7 @@ export default function VextioLoader() {
           }
           20% {
             opacity: 1;
-            text-shadow: 0 0 12px rgba(217,166,78,0.6), 0 0 24px rgba(217,166,78,0.3);
+            text-shadow: 0 0 12px rgba(194,59,59,0.7), 0 0 24px rgba(194,59,59,0.35);
           }
           40% {
             opacity: 0.15;

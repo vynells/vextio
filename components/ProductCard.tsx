@@ -122,10 +122,8 @@ export default function ProductCard({ product }: { product: Product }) {
 
         {product.badge && (
           <span
-            className={`absolute left-3 top-3 z-10 px-2 py-1 text-[10px] font-medium uppercase tracking-[0.12em] ${
-              product.badge === "Ltd."
-                ? "bg-gold text-brown"
-                : "bg-rust text-cream"
+            className={`sticker absolute left-3 top-3 z-10 ${
+              product.badge === "Ltd." ? "bg-gold text-cream" : "bg-rust text-brown"
             }`}
           >
             {product.badge}
@@ -135,7 +133,7 @@ export default function ProductCard({ product }: { product: Product }) {
         <button
           type="button"
           onClick={handleQuickAddClick}
-          className="absolute bottom-3 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap border border-cream bg-brown/80 px-5 py-2 text-[11px] font-medium uppercase tracking-[0.15em] text-cream opacity-100 transition-colors hover:bg-cream hover:text-brown md:bg-transparent md:opacity-0 md:group-hover:opacity-100"
+          className="absolute bottom-3 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap border border-cream bg-brown/80 px-5 py-2 text-[11px] font-medium uppercase tracking-[0.15em] text-cream opacity-100 transition-colors hover:bg-cream hover:text-brown hover:shadow-[3px_3px_0_#C23B3B] md:bg-transparent md:opacity-0 md:group-hover:opacity-100"
         >
           {added ? "Added" : "Quick add"}
         </button>
@@ -194,7 +192,7 @@ export default function ProductCard({ product }: { product: Product }) {
       <p className="mb-1 text-[13px] font-light text-muted">
         {product.detail}
       </p>
-      <p className="font-legal text-base font-bold text-brown">
+      <p className="font-legal text-[17px] tracking-[0.03em] text-brown">
         {product.price}
       </p>
 

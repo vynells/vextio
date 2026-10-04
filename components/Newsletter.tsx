@@ -29,9 +29,9 @@ export default function Newsletter() {
         contentKey="newsletter_eyebrow"
         defaultValue="Stay in the loop"
         as="p"
-        className="mb-4 text-[11px] font-medium uppercase tracking-[0.25em] text-gold"
+        className="mb-4 text-[11px] font-medium uppercase tracking-[0.25em] text-rust"
       />
-      <h2 className="mb-4 font-display text-[1.8rem] font-bold leading-tight text-cream md:text-[3rem]">
+      <h2 className="mb-4 font-display text-[2.2rem] uppercase leading-[1.02] text-cream md:text-[3.4rem]">
         <EditableText
           contentKey="newsletter_heading_line1"
           defaultValue="New drops."
@@ -67,12 +67,12 @@ export default function Newsletter() {
           aria-label="Email address"
           suppressHydrationWarning
           className={`flex-1 border bg-cream/[0.08] px-5 py-3.5 text-[14px] text-cream placeholder:text-cream/35 focus:outline-none ${
-            error ? "border-red-500" : "border-cream/20"
+            error ? "border-red-500" : "border-cream/30"
           }`}
         />
         <button
           type="submit"
-          className="whitespace-nowrap bg-rust px-6 py-3.5 text-[12px] font-medium uppercase tracking-[0.12em] text-cream transition-colors hover:bg-[#7a3418]"
+          className="btn-punk whitespace-nowrap px-6 py-3 [--btn-shadow:#0A0A0A] sm:ml-3"
         >
           {subscribed ? "Subscribed" : "Subscribe"}
         </button>

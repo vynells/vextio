@@ -18,7 +18,7 @@ export default {
       },
       fontFamily: {
         display: ["var(--font-anton)", "Impact", "sans-serif"],
-        legal: ["var(--font-playfair)", "Georgia", "serif"],
+        legal: ["var(--font-anton)", "Impact", "sans-serif"],
         body: ["var(--font-dm-sans)", "system-ui", "sans-serif"],
       },
       animation: {

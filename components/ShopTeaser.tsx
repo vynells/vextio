@@ -36,7 +36,7 @@ export default function ShopTeaser() {
             />
             <Link
               href="/products"
-              className="inline-block border-2 border-brown px-10 py-4 text-[13px] font-medium uppercase tracking-[0.15em] text-brown transition-colors hover:bg-brown hover:text-cream"
+              className="btn-punk btn-punk-ghost px-9"
             >
               <EditableText
                 contentKey="shop_teaser_button"
