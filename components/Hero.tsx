@@ -1,6 +1,6 @@
 "use client";
 
-import EditableText from "./EditableText";
+import Image from "next/image";
 import FadeIn from "./FadeIn";
 
 export default function Hero() {
@@ -16,51 +16,22 @@ export default function Hero() {
         />
       </FadeIn>
 
-      <FadeIn delay={150} className="pointer-events-none absolute">
-        <svg
-          viewBox="0 0 200 200"
-          className="h-[480px] w-[480px] md:h-[680px] md:w-[680px]"
-          style={{
-            filter: "drop-shadow(0 0 16px rgba(156,184,50,0.15))",
-            animation: "vextio-spin-in 1.4s ease-out",
-          }}
-        >
-          <path
-            d="M100 4
-               L118 78
-               L194 82
-               L128 118
-               L152 190
-               L100 144
-               L48 190
-               L72 118
-               L6 82
-               L82 78
-               Z"
-            fill="none"
-            stroke="url(#starGrad)"
-            strokeWidth="1.2"
-            opacity="0.4"
-          />
-          <defs>
-            <linearGradient id="starGrad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#9CB832" />
-              <stop offset="100%" stopColor="#C23B3B" />
-            </linearGradient>
-          </defs>
-        </svg>
-      </FadeIn>
-
       <div className="relative z-10 flex flex-col items-center">
-        <h1
-          className="select-none text-center font-display text-[5.5rem] uppercase leading-none tracking-[0.01em] text-brown sm:text-[7.5rem] md:text-[10rem] lg:text-[12rem]"
+        <h1 className="sr-only">Vextio</h1>
+        <Image
+          src="/vextio-logo.png"
+          alt="Vextio"
+          width={1260}
+          height={1400}
+          priority
+          sizes="(max-width: 768px) 80vw, 560px"
+          className="h-auto w-[78vw] max-w-[340px] select-none sm:max-w-[440px] md:max-w-[520px] lg:max-w-[580px]"
           style={{
-            textShadow: "0 0 20px rgba(156,184,50,0.18)",
+            filter: "drop-shadow(0 0 24px rgba(194,59,59,0.18))",
             animation: "vextio-hero-in 900ms cubic-bezier(0.16, 1, 0.3, 1) both",
           }}
-        >
-          <EditableText contentKey="hero_heading" defaultValue="Vextio" as="span" />
-        </h1>
+          draggable={false}
+        />
       </div>
 
       <style>{`
