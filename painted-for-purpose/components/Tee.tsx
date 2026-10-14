@@ -1,3 +1,4 @@
+import { useId } from "react";
 import type { Shirt } from "@/lib/site";
 
 const TEE =
@@ -66,20 +67,20 @@ function Art({ pattern, c }: { pattern: Shirt["pattern"]; c: Shirt["colors"] }) 
   }
 }
 
-export default function Tee({ shirt, className = "" }: { shirt: Shirt; className?: string }) {
-  const clip = `tee-${shirt.id}`;
+export default function Tee({ shirt, className = "", label }: { shirt: Shirt; className?: string; label?: string }) {
+  const clip = `tee-${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
   return (
-    <svg viewBox="0 0 240 240" className={className} role="img" aria-label={`${shirt.title} hand-painted T-shirt`}>
+    <svg viewBox="0 0 240 240" className={className} role="img" aria-label={label ?? `Drawing of a hand-painted T-shirt: ${shirt.title}`}>
       <defs>
         <clipPath id={clip}>
           <path d={TEE} />
         </clipPath>
       </defs>
-      <path d={TEE} fill="#fff" stroke="#1B1A17" strokeWidth="3" strokeLinejoin="round" />
+      <path d={TEE} fill="#fffdf6" stroke="#133621" strokeWidth="3" strokeLinejoin="round" />
       <g clipPath={`url(#${clip})`}>
         <Art pattern={shirt.pattern} c={shirt.colors} />
       </g>
-      <path d="M100 8 Q120 26 140 8" fill="none" stroke="#1B1A17" strokeWidth="3" />
+      <path d="M100 8 Q120 26 140 8" fill="none" stroke="#133621" strokeWidth="3" />
     </svg>
   );
 }

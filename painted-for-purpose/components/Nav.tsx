@@ -2,46 +2,53 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
-import { site } from "@/lib/site";
-
-const links = [
-  { href: "/about", label: "About" },
-  { href: "/impact", label: "Impact" },
-  { href: "/shop", label: "Shop" },
-];
+import { useEffect, useState } from "react";
+import { nav, site } from "@/lib/site";
+import Mark from "./Mark";
 
 export default function Nav() {
   const path = usePathname();
   const [open, setOpen] = useState(false);
 
+  useEffect(() => setOpen(false), [path]);
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
   return (
-    <header className="sticky top-0 z-40 border-b-2 border-ink bg-canvas/90 backdrop-blur">
-      <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
-        <Link href="/" className="flex items-center gap-2" onClick={() => setOpen(false)}>
-          <span className="grid h-10 w-10 place-items-center rounded-full border-2 border-ink bg-marigold font-display text-lg font-bold">
-            P4P
-          </span>
-          <span className="hidden font-display text-xl font-bold sm:inline">{site.name}</span>
+    <header className="relative z-30">
+      <a href="#main" className="btn btn-gold absolute left-4 top-3 -translate-y-24 focus:translate-y-0">
+        Skip to content
+      </a>
+      <nav aria-label="Main" className="wrap flex h-20 items-center justify-between gap-6">
+        <Link href="/" className="group flex items-center gap-3" aria-label={`${site.name}, home`}>
+          <Mark className="h-11 w-auto transition-transform duration-500 ease-out group-hover:-rotate-6" />
+          <span className="font-display text-[1.625rem] uppercase leading-none tracking-wide">{site.name}</span>
         </Link>
 
-        <div className="hidden items-center gap-8 md:flex">
-          {links.map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              className={`font-semibold underline-offset-8 hover:underline ${path === l.href ? "underline decoration-coral decoration-4" : ""}`}
-            >
-              {l.label}
-            </Link>
+        <ul className="hidden items-center gap-8 md:flex">
+          {nav.map((l) => (
+            <li key={l.href}>
+              <Link
+                href={l.href}
+                aria-current={path === l.href ? "page" : undefined}
+                className="link text-lead decoration-transparent aria-[current=page]:decoration-gold hover:decoration-gold"
+              >
+                {l.label}
+              </Link>
+            </li>
           ))}
-          <Link href="/join" className="btn btn-primary">
-            Join a session
-          </Link>
-        </div>
+          <li>
+            <Link href="/shop" className="btn btn-gold">Shop shirts</Link>
+          </li>
+        </ul>
 
         <button
-          className="rounded-lg border-2 border-ink px-3 py-1 font-semibold md:hidden"
+          type="button"
+          className="btn btn-gold md:hidden"
           aria-expanded={open}
           aria-controls="mobile-menu"
           onClick={() => setOpen((o) => !o)}
@@ -50,20 +57,25 @@ export default function Nav() {
         </button>
       </nav>
 
-      {open && (
-        <div id="mobile-menu" className="border-t-2 border-ink px-4 pb-6 pt-2 md:hidden">
-          {[...links, { href: "/join", label: "Join a session" }].map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              onClick={() => setOpen(false)}
-              className="block py-3 font-display text-2xl font-bold"
-            >
-              {l.label}
-            </Link>
+      <div
+        id="mobile-menu"
+        hidden={!open}
+        className="absolute inset-x-0 top-20 bg-gold pb-10 pt-4 text-green md:hidden"
+      >
+        <ul className="wrap">
+          {[{ href: "/", label: "Home" }, ...nav].map((l) => (
+            <li key={l.href}>
+              <Link
+                href={l.href}
+                aria-current={path === l.href ? "page" : undefined}
+                className="on-paper block py-2 font-display text-[3.25rem] uppercase leading-none aria-[current=page]:underline"
+              >
+                {l.label}
+              </Link>
+            </li>
           ))}
-        </div>
-      )}
+        </ul>
+      </div>
     </header>
   );
 }
