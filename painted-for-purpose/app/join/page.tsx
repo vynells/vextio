@@ -60,7 +60,7 @@ export default function Join() {
       <section aria-labelledby="get-title" className="py-24 sm:py-36">
         <div className="wrap">
           <h2 id="get-title" data-reveal className="text-head max-w-[12ch]">What you take home</h2>
-          <ul className="mt-14 grid gap-3 md:grid-cols-3">
+          <ul className="mt-14 grid gap-3 lg:grid-cols-3">
             {rewards.map((r, i) => (
               <li
                 key={r.t}
