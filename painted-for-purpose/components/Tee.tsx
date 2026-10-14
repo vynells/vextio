@@ -70,7 +70,7 @@ function Art({ pattern, c }: { pattern: Shirt["pattern"]; c: Shirt["colors"] }) 
 export default function Tee({ shirt, className = "", label }: { shirt: Shirt; className?: string; label?: string }) {
   const clip = `tee-${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
   return (
-    <svg viewBox="0 0 240 240" className={className} role="img" aria-label={label ?? `Drawing of a hand-painted T-shirt: ${shirt.title}`}>
+    <svg viewBox="0 0 240 240" className={className} {...(label === "" ? { "aria-hidden": true } : { role: "img", "aria-label": label ?? `Drawing of a hand-painted T-shirt: ${shirt.title}` })}>
       <defs>
         <clipPath id={clip}>
           <path d={TEE} />

@@ -51,7 +51,7 @@ const outcomes = [
 export default function About() {
   return (
     <>
-      <PageHead title="Creativity that keeps paying">
+      <PageHead title="Art that keeps giving">
         {site.name} is a student-led NGO that supports Pakistani flood relief charities through a self-sustaining,
         creative fundraising model.
       </PageHead>
@@ -144,7 +144,7 @@ export default function About() {
               <div data-reveal>
                 <h3 className="font-serif text-body font-semibold normal-case">What we expect to achieve</h3>
                 <div className="mt-2">
-                  {outcomes.map((o) => <Row key={o} label={o} value="✓" />)}
+                  {outcomes.map((o) => <Row key={o} label={o} value="aim" />)}
                 </div>
                 <Total label="Creativity + community service" value="Lasting impact" />
               </div>

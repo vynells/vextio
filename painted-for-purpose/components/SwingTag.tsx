@@ -41,14 +41,12 @@ export default function SwingTag({ className = "" }: { className?: string }) {
 
       <div className="tnum mt-6 grid grid-cols-2 gap-px bg-green/15" aria-live="polite">
         <div className="bg-gold p-4">
-          <p className="text-small">Flood relief charities</p>
-          <p className="mt-1 font-display text-[2.5rem] leading-none sm:text-[3rem]">{num(relief)}</p>
-          <p className="text-small">PKR · 50%</p>
+          <p className="font-display text-[2.5rem] leading-none sm:text-[3rem]">{num(relief)}</p>
+          <p className="text-small">PKR to flood relief charities</p>
         </div>
         <div className="bg-paper-2 p-4">
-          <p className="text-small">The next session</p>
-          <p className="mt-1 font-display text-[2.5rem] leading-none sm:text-[3rem]">{num(next)}</p>
-          <p className="text-small">PKR · 50%</p>
+          <p className="font-display text-[2.5rem] leading-none sm:text-[3rem]">{num(next)}</p>
+          <p className="text-small">PKR to the next session</p>
         </div>
       </div>
       <p className="mt-4 text-small">

@@ -8,7 +8,7 @@ export default {
       colors: {
         // Ground and type: a two-colour print job, bottle green and gold.
         green: { DEFAULT: "#133621", 2: "#1a4429", 3: "#22532f", deep: "#0d2817" },
-        gold: { DEFAULT: "#f4d96c", soft: "#c9b866" },
+        gold: { DEFAULT: "#f4d96c", soft: "#d6c675" },
         // The stationery the page is printed on.
         paper: { DEFAULT: "#f6eedb", 2: "#ece0c2" },
         // Paint colours: used on the shirts and the folder tabs, never for running text.
@@ -27,7 +27,7 @@ export default {
         body: ["clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem)", { lineHeight: "1.5" }],
         lead: ["clamp(1.25rem, 1.1rem + 0.7vw, 1.625rem)", { lineHeight: "1.35" }],
         head: ["clamp(3rem, 1.6rem + 6vw, 6.5rem)", { lineHeight: "0.88", letterSpacing: "-0.01em" }],
-        giant: ["clamp(5.5rem, 2rem + 15vw, 15rem)", { lineHeight: "0.82", letterSpacing: "-0.02em" }],
+        giant: ["clamp(4.5rem, 1.5rem + 15vw, 15rem)", { lineHeight: "0.82", letterSpacing: "-0.02em" }],
       },
       transitionTimingFunction: { out: "cubic-bezier(0.22, 1, 0.36, 1)" },
     },

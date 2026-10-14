@@ -68,7 +68,7 @@ export default function Impact() {
       <section aria-labelledby="roadmap-title" className="bg-green-3 py-24 sm:py-36">
         <div className="wrap">
           <div className="grid gap-8 md:grid-cols-12">
-            <h2 id="roadmap-title" data-reveal className="text-head md:col-span-6">Less reinvested, over time</h2>
+            <h2 id="roadmap-title" data-reveal className="text-head md:col-span-6">Reinvesting less</h2>
             <p data-reveal style={{ ["--d" as string]: 1 }} className="md:col-span-5 md:col-start-8">
               The founders fund the launch. After that, the share of funds needed to run the next session is meant to
               fall as P4P becomes established, until it runs on its own revenue while its charitable contribution

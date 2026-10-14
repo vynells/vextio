@@ -26,7 +26,7 @@ export default function Nav() {
       <nav aria-label="Main" className="wrap flex h-20 items-center justify-between gap-6">
         <Link href="/" className="group flex items-center gap-3" aria-label={`${site.name}, home`}>
           <Mark className="h-11 w-auto transition-transform duration-500 ease-out group-hover:-rotate-6" />
-          <span className="font-display text-[1.625rem] uppercase leading-none tracking-wide">{site.name}</span>
+          <span translate="no" className="font-display text-[1.625rem] uppercase leading-none tracking-wide">{site.name}</span>
         </Link>
 
         <ul className="hidden items-center gap-8 md:flex">

@@ -37,7 +37,7 @@ export default function Home() {
       {/* HERO — a stack of tabbed folders */}
       <section aria-labelledby="hero-title" className="overflow-hidden pt-10 sm:pt-16">
         <div className="wrap text-center">
-          <h1 id="hero-title" data-reveal className="mx-auto max-w-[11ch] text-[clamp(4.25rem,1rem+12vw,11rem)] leading-[0.84] tracking-[-0.01em] lg:max-w-none">
+          <h1 id="hero-title" data-reveal className="mx-auto max-w-[11ch] text-[clamp(4.25rem,1rem+12vw,11rem)] leading-[0.84] tracking-[-0.01em] md:max-w-none">
             Paint a shirt.<br /> Fund flood relief.
           </h1>
           <p data-reveal style={{ ["--d" as string]: 1 }} className="mx-auto mt-6 max-w-[46ch] text-lead">
@@ -99,7 +99,7 @@ export default function Home() {
       <section id="how" aria-labelledby="how-title" className="scroll-mt-4 bg-sky py-24 text-green sm:py-36">
         <div className="wrap grid gap-12 lg:grid-cols-12">
           <div className="lg:col-span-5">
-            <h2 id="how-title" data-reveal className="text-head">From blank tee to donation</h2>
+            <h2 id="how-title" data-reveal className="text-head">How it works</h2>
             <p data-reveal style={{ ["--d" as string]: 1 }} className="mt-6 max-w-[34ch]">
               Every session follows the same cycle. Each one funds charitable work and the session after it, so P4P
               keeps going without relying on repeated outside funding.
@@ -171,7 +171,7 @@ export default function Home() {
                 className="sway on-paper relative flex h-full flex-col bg-paper px-5 pt-10"
               >
                 <span className="tag-hole !bg-gold" aria-hidden />
-                <Tee shirt={s} className="mx-auto w-full max-w-[220px]" />
+                <Tee shirt={s} label="" className="mx-auto w-full max-w-[220px]" />
                 <span className="mt-3 flex items-baseline justify-between gap-3">
                   <span className="font-medium">{s.title}</span>
                   <span className="tnum text-small">{s.sold ? "Sold" : `Size ${s.size}`}</span>
