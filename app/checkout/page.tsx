@@ -64,6 +64,12 @@ export default function CheckoutPage() {
       });
 
       if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        // 400/409 carry a customer-facing reason (e.g. out of stock)
+        if (res.status === 400 || res.status === 409) {
+          setError(data?.error || "Please check your order and try again.");
+          return;
+        }
         throw new Error("Failed to send order");
       }
 

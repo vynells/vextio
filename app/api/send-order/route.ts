@@ -1,9 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
-import { sql } from "@vercel/postgres";
+import { db } from "@vercel/postgres";
 import { parsePrice, formatPKR } from "@/lib/price";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+
+const PAYMENT_METHODS = ["Cash on Delivery", "Card (Debit & Credit)", "Bank transfer", "Easypaisa"];
+const MAX_QTY_PER_LINE = 20;
+const MAX_LINES = 50;
+
+class OrderError extends Error {}
+
+type OrderLine = {
+  id: string;
+  size?: string;
+  qty: number;
+  name: string;
+  price: string;
+  imageUrl?: string;
+};
 
 function getSiteUrl(): string {
   if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL;
@@ -20,35 +35,120 @@ function generateOrderNumber(): string {
   return `${datePart}${randomPart}`;
 }
 
+function escapeHtml(value: unknown): string {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function cleanString(value: unknown, field: string, maxLen: number, required = true): string {
+  if (value == null || value === "") {
+    if (required) throw new OrderError(`Missing ${field}`);
+    return "";
+  }
+  if (typeof value !== "string") throw new OrderError(`Invalid ${field}`);
+  const trimmed = value.trim();
+  if (required && !trimmed) throw new OrderError(`Missing ${field}`);
+  if (trimmed.length > maxLen) throw new OrderError(`${field} is too long`);
+  return trimmed;
+}
+
+function parseOrder(body: Record<string, unknown>) {
+  const paymentMethod = cleanString(body.paymentMethod, "payment method", 50);
+  if (!PAYMENT_METHODS.includes(paymentMethod)) throw new OrderError("Invalid payment method");
+
+  if (!Array.isArray(body.items) || body.items.length === 0) throw new OrderError("Your cart is empty");
+  if (body.items.length > MAX_LINES) throw new OrderError("Too many items in cart");
+
+  // Merge duplicate id+size lines so stock checks see the full quantity
+  const merged = new Map<string, { id: string; size?: string; qty: number }>();
+  for (const raw of body.items as Record<string, unknown>[]) {
+    const id = cleanString(raw?.id, "item id", 200);
+    const size = cleanString(raw?.size, "item size", 20, false) || undefined;
+    const qty = raw?.qty;
+    if (typeof qty !== "number" || !Number.isInteger(qty) || qty < 1 || qty > MAX_QTY_PER_LINE) {
+      throw new OrderError("Invalid item quantity");
+    }
+    const key = `${id}::${size ?? ""}`;
+    const existing = merged.get(key);
+    if (existing) existing.qty += qty;
+    else merged.set(key, { id, size, qty });
+  }
+
+  return {
+    contact: cleanString(body.contact, "contact", 200),
+    firstName: cleanString(body.firstName, "first name", 100),
+    lastName: cleanString(body.lastName, "last name", 100),
+    address: cleanString(body.address, "address", 300),
+    apartment: cleanString(body.apartment, "apartment", 200, false),
+    city: cleanString(body.city, "city", 100),
+    postalCode: cleanString(body.postalCode, "postal code", 20, false),
+    phone: cleanString(body.phone, "phone", 30),
+    paymentMethod,
+    requested: [...merged.values()],
+  };
+}
+
 export async function POST(req: NextRequest) {
+  let order: ReturnType<typeof parseOrder>;
   try {
-    const body = await req.json();
-    const {
-      contact,
-      firstName,
-      lastName,
-      address,
-      apartment,
-      city,
-      postalCode,
-      phone,
-      paymentMethod,
-      items,
-    } = body;
+    order = parseOrder(await req.json());
+  } catch (err) {
+    const message = err instanceof OrderError ? err.message : "Invalid request";
+    return NextResponse.json({ success: false, error: message }, { status: 400 });
+  }
 
-    const orderNumber = generateOrderNumber();
-    const initialStatus = paymentMethod === "Cash on Delivery" ? "processing" : "pending";
+  const { contact, firstName, lastName, address, apartment, city, postalCode, phone, paymentMethod } = order;
+  const orderNumber = generateOrderNumber();
+  const initialStatus = paymentMethod === "Cash on Delivery" ? "processing" : "pending";
+  const items: OrderLine[] = [];
+  let subtotal = 0;
+  let shipping = 0;
+  let total = 0;
 
-    const subtotal = items.reduce(
-      (sum: number, item: { price: string; qty: number }) =>
-        sum + parsePrice(item.price) * item.qty,
-      0
-    );
-    const shipping = items.length > 0 ? 300 : 0;
-    const total = subtotal + shipping;
+  const client = await db.connect();
+  try {
+    await client.sql`BEGIN`;
 
-    // --- Save the order to the database ---
-    await sql`
+    // Prices, names and stock come from the database, never from the client.
+    // FOR UPDATE locks the product rows so concurrent orders can't oversell.
+    for (const line of order.requested) {
+      const { rows } = await client.sql`
+        SELECT id, name, price, image_url, sizes FROM products WHERE id = ${line.id} FOR UPDATE
+      `;
+      if (rows.length === 0) throw new OrderError("An item in your cart is no longer available");
+      const product = rows[0];
+      const sizes: Record<string, number> = product.sizes || {};
+
+      if (line.size) {
+        if (!(line.size in sizes)) {
+          throw new OrderError(`Size ${line.size} isn't available for ${product.name}`);
+        }
+        if ((sizes[line.size] ?? 0) < line.qty) {
+          throw new OrderError(`Not enough stock for ${product.name} (${line.size})`);
+        }
+      } else if (Object.keys(sizes).length > 0) {
+        throw new OrderError(`Please choose a size for ${product.name}`);
+      }
+
+      items.push({
+        id: product.id,
+        size: line.size,
+        qty: line.qty,
+        name: product.name,
+        price: product.price,
+        imageUrl: product.image_url || undefined,
+      });
+    }
+
+    subtotal = items.reduce((sum, item) => sum + parsePrice(item.price) * item.qty, 0);
+    shipping = items.length > 0 ? 300 : 0;
+    total = subtotal + shipping;
+
+    await client.sql`
       INSERT INTO orders (
         order_number, status, contact, first_name, last_name, address, apartment,
         city, postal_code, phone, payment_method, items, subtotal, shipping, total
@@ -60,44 +160,64 @@ export async function POST(req: NextRequest) {
       )
     `;
 
-    // --- Decrement stock quantity for each sized item ordered ---
-    // Only do this immediately for orders that start as "processing" (i.e. COD).
+    // Only decrement stock immediately for orders that start as "processing" (i.e. COD).
     // Orders awaiting payment confirmation ("pending") only decrement stock once
     // they're moved to "processing" from the ops app.
     if (initialStatus === "processing") {
-      for (const item of items as { id: string; size?: string; qty: number }[]) {
-        if (!item.size) continue; // sizeless items don't track per-size stock
-        try {
-          const { rows } = await sql`SELECT sizes FROM products WHERE id = ${item.id}`;
-          if (rows.length === 0) continue;
-          const currentSizes: Record<string, number> = rows[0].sizes || {};
-          const currentQty = currentSizes[item.size] ?? 0;
-          const newQty = Math.max(0, currentQty - (item.qty || 1));
-          const updatedSizes = { ...currentSizes, [item.size]: newQty };
-          await sql`
-            UPDATE products SET sizes = ${JSON.stringify(updatedSizes)}::jsonb WHERE id = ${item.id}
-          `;
-        } catch (stockErr) {
-          console.error(`Failed to update stock for ${item.id} size ${item.size}:`, stockErr);
-        }
+      for (const item of items) {
+        if (!item.size) continue;
+        await client.sql`
+          UPDATE products
+          SET sizes = jsonb_set(sizes, ARRAY[${item.size}::text], to_jsonb((sizes->>${item.size})::int - ${item.qty}))
+          WHERE id = ${item.id}
+        `;
       }
     }
 
+    await client.sql`COMMIT`;
+  } catch (err) {
+    await client.sql`ROLLBACK`.catch(() => {});
+    if (err instanceof OrderError) {
+      return NextResponse.json({ success: false, error: err.message }, { status: 409 });
+    }
+    console.error("Order save error:", err);
+    return NextResponse.json({ success: false, error: "Failed to place order" }, { status: 500 });
+  } finally {
+    client.release();
+  }
+
+  // Everything customer-supplied is escaped before it goes into email HTML
+  const e = {
+    contact: escapeHtml(contact),
+    firstName: escapeHtml(firstName),
+    lastName: escapeHtml(lastName),
+    address: escapeHtml(address),
+    apartment: escapeHtml(apartment),
+    city: escapeHtml(city),
+    postalCode: escapeHtml(postalCode),
+    phone: escapeHtml(phone),
+    paymentMethod: escapeHtml(paymentMethod),
+  };
+  const itemLabel = (item: OrderLine) => escapeHtml(item.size ? `${item.name} (${item.size})` : item.name);
+
+  // The order is already saved, so an email failure must not tell the customer
+  // it failed (they'd retry and place a duplicate order).
+  try {
     const itemsRowsHtml = items
       .map(
-        (item: { name: string; price: string; qty: number; imageUrl?: string }) =>
+        (item) =>
           `<tr>
             <td style="padding:12px 0;border-bottom:1px solid #eee;">
               <table cellpadding="0" cellspacing="0"><tr>
                 ${
                   item.imageUrl
                     ? `<td style="width:56px;padding-right:12px;">
-                        <img src="${item.imageUrl}" width="56" height="56" style="object-fit:cover;border-radius:2px;" />
+                        <img src="${escapeHtml(item.imageUrl)}" width="56" height="56" style="object-fit:cover;border-radius:2px;" />
                       </td>`
                     : ""
                 }
                 <td>
-                  <div style="font-size:14px;color:#2A2420;">${item.name}</div>
+                  <div style="font-size:14px;color:#2A2420;">${itemLabel(item)}</div>
                   <div style="font-size:12px;color:#8A7B6C;">Qty ${item.qty}</div>
                 </td>
               </tr></table>
@@ -111,9 +231,9 @@ export async function POST(req: NextRequest) {
 
     const itemsRowsPlain = items
       .map(
-        (item: { name: string; price: string; qty: number }) =>
+        (item) =>
           `<tr>
-            <td style="padding:8px 12px;border-bottom:1px solid #eee;">${item.name}</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #eee;">${itemLabel(item)}</td>
             <td style="padding:8px 12px;border-bottom:1px solid #eee;">${item.qty}</td>
             <td style="padding:8px 12px;border-bottom:1px solid #eee;">${formatPKR(parsePrice(item.price) * item.qty)}</td>
           </tr>`
@@ -130,17 +250,17 @@ export async function POST(req: NextRequest) {
           <h2>New Order Received</h2>
           <p style="font-size:14px;color:#555;"><strong>Order #:</strong> ${orderNumber}</p>
           <h3>Contact</h3>
-          <p>${contact}</p>
+          <p>${e.contact}</p>
           <h3>Delivery</h3>
           <p>
-            ${firstName} ${lastName}<br/>
-            ${address}${apartment ? `, ${apartment}` : ""}<br/>
-            ${city}${postalCode ? `, ${postalCode}` : ""}<br/>
+            ${e.firstName} ${e.lastName}<br/>
+            ${e.address}${apartment ? `, ${e.apartment}` : ""}<br/>
+            ${e.city}${postalCode ? `, ${e.postalCode}` : ""}<br/>
             Pakistan<br/>
-            Phone: ${phone}
+            Phone: ${e.phone}
           </p>
           <h3>Payment method</h3>
-          <p>${paymentMethod}</p>
+          <p>${e.paymentMethod}</p>
           <h3>Items</h3>
           <table style="border-collapse: collapse; width: 100%;">
             <thead>
@@ -162,7 +282,7 @@ export async function POST(req: NextRequest) {
     });
 
     // --- Email to the customer ---
-    if (contact && contact.includes("@")) {
+    if (contact.includes("@")) {
       await resend.emails.send({
         from: "Vextio <orders@blackoutmc.xyz>",
         to: contact,
@@ -171,7 +291,7 @@ export async function POST(req: NextRequest) {
           <div style="font-family: -apple-system, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #2A2420;">
             <div style="padding: 32px 24px 16px;">
               <p style="font-size:20px;font-weight:700;letter-spacing:0.05em;margin:0 0 24px;">VEXTIO</p>
-              <p style="font-size:18px;font-weight:600;margin:0 0 8px;">Thank you for your order, ${firstName}!</p>
+              <p style="font-size:18px;font-weight:600;margin:0 0 8px;">Thank you for your order, ${e.firstName}!</p>
               <p style="font-size:14px;color:#8A7B6C;margin:0 0 8px;">
                 We're getting your order ready. You'll pay by Cash on Delivery when it arrives.
               </p>
@@ -205,11 +325,11 @@ export async function POST(req: NextRequest) {
                 Delivery address
               </p>
               <p style="font-size:14px;line-height:1.6;margin:0;">
-                ${firstName} ${lastName}<br/>
-                ${address}${apartment ? `, ${apartment}` : ""}<br/>
-                ${city}${postalCode ? `, ${postalCode}` : ""}<br/>
+                ${e.firstName} ${e.lastName}<br/>
+                ${e.address}${apartment ? `, ${e.apartment}` : ""}<br/>
+                ${e.city}${postalCode ? `, ${e.postalCode}` : ""}<br/>
                 Pakistan<br/>
-                ${phone}
+                ${e.phone}
               </p>
             </div>
 
@@ -222,13 +342,9 @@ export async function POST(req: NextRequest) {
         `,
       });
     }
-
-    return NextResponse.json({ success: true, orderNumber });
   } catch (error) {
-    console.error("Order email error:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to send order email" },
-      { status: 500 }
-    );
+    console.error(`Order ${orderNumber} saved but email failed:`, error);
   }
+
+  return NextResponse.json({ success: true, orderNumber });
 }
