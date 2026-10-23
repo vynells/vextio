@@ -344,37 +344,59 @@ function Sections({ data, onClose, onChanged }: { data: Data; onClose: () => voi
   };
   const count = (id: string) => data.products.filter((p) => p.category_id === id).length;
 
+  // Order is changed here straight away, then saved; a failed save puts it back.
+  const [cats, setCats] = useState(data.categories);
+  const [subs, setSubs] = useState(data.subcategories);
+  useEffect(() => { setCats(data.categories); setSubs(data.subcategories); }, [data]);
+  const swap = <T,>(list: T[], i: number, j: number) => { const n = [...list]; [n[i], n[j]] = [n[j], n[i]]; return n; };
+  const moveCat = async (i: number, dir: -1 | 1) => {
+    const next = swap(cats, i, i + dir);
+    setCats(next);
+    if (!(await run("categories/reorder", { ids: next.map((c) => c.id) }))) setCats(data.categories);
+  };
+  const moveSub = async (categoryId: string, i: number, dir: -1 | 1) => {
+    const mine = subs.filter((s) => s.category_id === categoryId);
+    const next = swap(mine, i, i + dir);
+    setSubs([...subs.filter((s) => s.category_id !== categoryId), ...next]);
+    if (!(await run("subcategories/reorder", { ids: next.map((s) => s.id) }))) setSubs(data.subcategories);
+  };
+
   return (
     <motion.div className="absolute inset-0 z-40 grid place-items-center bg-black/55" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onMouseDown={onClose}>
       <motion.div role="dialog" aria-label="Shop sections" onMouseDown={(e) => e.stopPropagation()}
         className="flex max-h-[80%] w-[560px] flex-col overflow-hidden rounded-2xl bg-raised shadow-pop ring-1 ring-white/[0.1]"
         initial={{ opacity: 0, y: 10, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} transition={{ duration: 0.2, ease }}>
         <div className="flex items-center border-b border-line px-5 py-4">
-          <div className="flex-1"><h2 className="text-[20px]">Shop sections</h2><p className="text-[12.5px] text-ink-muted">How products are grouped on the website. Removing a section keeps its products.</p></div>
+          <div className="flex-1"><h2 className="text-[20px]">Shop sections</h2><p className="text-[12.5px] text-ink-muted">How products are grouped on the website, in this order. The first one is what the shop opens on. Removing a section keeps its products.</p></div>
           <button type="button" onClick={onClose} aria-label="Close" className="grid h-8 w-8 place-items-center rounded-md text-ink-muted hover:bg-white/[0.07] hover:text-ink"><Icon name="close" className="h-4 w-4" /></button>
         </div>
         <div className="min-h-0 flex-1 space-y-2 overflow-y-auto p-5">
-          {data.categories.length === 0 && <p className="text-[13px] text-ink-muted">No sections yet.</p>}
-          {data.categories.map((c) => (
-            <div key={c.id} className="rounded-lg bg-white/[0.02] p-3 ring-1 ring-line">
+          {cats.length === 0 && <p className="text-[13px] text-ink-muted">No sections yet.</p>}
+          {cats.map((c, i) => (
+            <motion.div layout key={c.id} transition={{ type: "spring", stiffness: 500, damping: 40 }} className="rounded-lg bg-white/[0.02] p-3 ring-1 ring-line">
               <div className="flex items-center gap-2">
-                <p className="flex-1 font-semibold">{c.name} <span className="ml-1 text-[12px] font-normal text-ink-muted">{count(c.id)} products</span></p>
+                <span className="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-white/[0.06] text-[12px] font-bold tabular-nums text-ink-muted">{i + 1}</span>
+                <p className="flex-1 font-semibold">{c.name} <span className="ml-1 text-[12px] font-normal text-ink-muted">{count(c.id)} products{i === 0 ? " · shown first" : ""}</span></p>
+                <button type="button" aria-label={`Move ${c.name} up`} title="Move up" disabled={busy || i === 0} onClick={() => moveCat(i, -1)} className="grid h-7 w-7 place-items-center rounded-md text-ink-muted transition hover:bg-white/[0.07] hover:text-ink active:scale-90 disabled:opacity-30"><Icon name="up" className="h-4 w-4" /></button>
+                <button type="button" aria-label={`Move ${c.name} down`} title="Move down" disabled={busy || i === cats.length - 1} onClick={() => moveCat(i, 1)} className="grid h-7 w-7 place-items-center rounded-md text-ink-muted transition hover:bg-white/[0.07] hover:text-ink active:scale-90 disabled:opacity-30"><Icon name="down" className="h-4 w-4" /></button>
                 <button type="button" className="btn btn-quiet h-7 px-2 text-[12px]" disabled={busy}
                   onClick={() => confirm(`Remove the ${c.name} section? Its products stay in the shop without a section.`) && run(`categories/${encodeURIComponent(c.id)}/delete`, {})}>Remove</button>
               </div>
               <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                {data.subcategories.filter((s) => s.category_id === c.id).map((s) => (
-                  <span key={s.id} className="flex items-center gap-1 rounded-md bg-white/[0.05] py-1 pl-2 pr-1 text-[12px]">
-                    {s.name}
+                {subs.filter((s) => s.category_id === c.id).map((s, j, mine) => (
+                  <motion.span layout key={s.id} className="flex items-center gap-0.5 rounded-md bg-white/[0.05] py-1 pl-1 pr-1 text-[12px]">
+                    {j > 0 && <button type="button" aria-label={`Move ${s.name} left`} title="Move left" disabled={busy} onClick={() => moveSub(c.id, j, -1)} className="grid h-5 w-4 place-items-center rounded text-ink-muted hover:text-ink"><Icon name="left" className="h-3 w-3" /></button>}
+                    <span className="px-1">{s.name}</span>
+                    {j < mine.length - 1 && <button type="button" aria-label={`Move ${s.name} right`} title="Move right" disabled={busy} onClick={() => moveSub(c.id, j, 1)} className="grid h-5 w-4 place-items-center rounded text-ink-muted hover:text-ink"><Icon name="right" className="h-3 w-3" /></button>}
                     <button type="button" aria-label={`Remove ${s.name}`} disabled={busy} onClick={() => run(`subcategories/${encodeURIComponent(s.id)}/delete`, {})} className="grid h-5 w-5 place-items-center rounded text-ink-muted hover:text-coral"><Icon name="close" className="h-3 w-3" /></button>
-                  </span>
+                  </motion.span>
                 ))}
                 <form className="flex items-center gap-1" onSubmit={async (e) => { e.preventDefault(); if (await run("subcategories", { name: subName[c.id], categoryId: c.id })) setSubName({ ...subName, [c.id]: "" }); }}>
                   <input value={subName[c.id] ?? ""} onChange={(e) => setSubName({ ...subName, [c.id]: e.target.value })} placeholder="+ sub-section"
                     className="h-7 w-32 rounded-md bg-transparent px-2 text-[12px] outline-none ring-1 ring-line focus:ring-pink" />
                 </form>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
         <form className="flex gap-2 border-t border-line p-4" onSubmit={async (e) => { e.preventDefault(); if (await run("categories", { name })) setName(""); }}>

@@ -331,6 +331,14 @@ async function handle(req: Request, path: string[]) {
   }
 
   // ---- Shop sections (categories and subcategories) ----
+  // The shop lists sections and sub-sections by sort_order, so reordering just rewrites it.
+  if (method === "POST" && (a === "categories" || a === "subcategories") && b === "reorder") {
+    const ids = Array.isArray(body.ids) ? body.ids.map((x) => String(x)).slice(0, 200) : [];
+    if (!ids.length) return fail("Nothing to reorder.");
+    const table = a === "categories" ? "categories" : "subcategories";
+    for (const [i, id] of ids.entries()) await q(`UPDATE ${table} SET sort_order = $2 WHERE id = $1`, [id, i]);
+    return json({ ok: "Order saved. The shop shows it straight away." });
+  }
   if (method === "POST" && a === "categories") {
     if (b && c === "delete") {
       await q("DELETE FROM subcategories WHERE category_id = $1", [decodeURIComponent(b)]);
