@@ -1,0 +1,42 @@
+# Builds the Vextio Orders Windows app and publishes it as a GitHub release.
+# Installed copies of the app find the new release and update themselves.
+# To ship a new version: bump "version" in desktop/package.json, commit, then push a tag like v1.2.0.
+name: Release Vextio Orders
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: desktop
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+
+      - name: Check the tag matches the app version
+        shell: bash
+        run: |
+          want="v$(node -p "require('./package.json').version")"
+          if [ "$want" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME doesn't match desktop/package.json version ($want)."
+            exit 1
+          fi
+
+      - run: npm ci
+
+      - name: Build and publish
+        run: npm run release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

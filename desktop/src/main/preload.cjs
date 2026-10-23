@@ -26,4 +26,8 @@ contextBridge.exposeInMainWorld("vextio", {
   onOnline: on("online"),
   onSignedOut: on("signed-out"),
   onConfig: on("config"),
+  getUpdate: () => ipcRenderer.invoke("update:get"),
+  checkUpdate: () => ipcRenderer.invoke("update:check"),
+  installUpdate: () => ipcRenderer.invoke("update:install"),
+  onUpdate: on("update"),
 });

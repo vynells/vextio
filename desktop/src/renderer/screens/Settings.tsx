@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
-import { bridge, isDesktop, type Config, type Me } from "../bridge";
+import { bridge, isDesktop, type Config, type Me, type Update } from "../bridge";
 import { when } from "../format";
 import { Area, Button, Check, Fade, Field, Icon, useToast } from "../ui/kit";
 
@@ -39,7 +39,7 @@ export default function SettingsScreen({ config, setConfig, onSignOut }: { confi
               {d && tab === "shop" && <Shop s={d.settings} onSaved={load} />}
               {d && tab === "automation" && <Automation d={d} />}
               {d && tab === "team" && <TeamPanel d={d} reload={load} />}
-              {tab === "app" && <AppPrefs config={config} setConfig={setConfig} />}
+              {tab === "app" && <><Updates version={config?.version ?? ""} /><AppPrefs config={config} setConfig={setConfig} /></>}
               {d && tab === "account" && <Account d={d} config={config} onSignOut={onSignOut} />}
             </motion.div>
           </AnimatePresence>
@@ -162,6 +162,30 @@ function TeamPanel({ d, reload }: { d: Data; reload: () => void }) {
   );
 }
 
+function Updates({ version }: { version: string }) {
+  const [u, setU] = useState<Update>({ state: "idle" });
+  useEffect(() => { bridge.getUpdate().then(setU); return bridge.onUpdate(setU); }, []);
+  const text = {
+    idle: "Checks for updates automatically.",
+    dev: "Updates are only available in the installed app.",
+    checking: "Checking for updates…",
+    current: "You’re on the latest version.",
+    downloading: `Downloading ${u.version ?? "the update"}… ${u.percent ?? 0}%`,
+    ready: `Version ${u.version} is downloaded. Restart to finish updating (or it installs next time you quit).`,
+    error: `Couldn’t check for updates${u.message ? `: ${u.message}` : "."} It will try again later.`,
+  }[u.state];
+  return (
+    <Card title="Updates" text={`Vextio Orders ${version}. New versions download by themselves, so you never need the installer again.`}>
+      <div className="flex items-center gap-3">
+        <p className="flex-1 text-[13px] text-ink-body">{text}</p>
+        {u.state === "ready"
+          ? <Button onClick={() => bridge.installUpdate()} className="btn-accent">Restart and update</Button>
+          : <Button busy={u.state === "checking"} disabled={u.state === "dev" || u.state === "downloading"} onClick={() => bridge.checkUpdate().then(setU)} className="btn-ghost">Check for updates</Button>}
+      </div>
+    </Card>
+  );
+}
+
 function AppPrefs({ config, setConfig }: { config: Config | null; setConfig: (c: Config) => void }) {
   if (!config) return null;
   const set = async (p: Partial<Config>) => setConfig(await bridge.setConfig(p));
@@ -176,7 +200,7 @@ function AppPrefs({ config, setConfig }: { config: Config | null; setConfig: (c:
       <div className="mt-6 border-t border-line pt-4">
         <p className="label">Keyboard shortcuts</p>
         <dl className="mt-3 grid grid-cols-2 gap-x-8 gap-y-2 text-[13px]">
-          {[["Ctrl K", "Search everything"], ["Ctrl F", "Search orders"], ["Ctrl 1 – 5", "Orders, Customers, Stock, Support, Settings"], ["F5", "Refresh"], ["↑ ↓  Enter", "Move and open orders"], ["Esc", "Close an order"]].map(([k, v]) => (
+          {[["Ctrl K", "Search everything"], ["Ctrl F", "Search orders"], ["Ctrl 1 – 6", "Switch screens"], ["Ctrl S", "Save a product"], ["F5", "Refresh"], ["↑ ↓  Enter", "Move and open orders"], ["Esc", "Close an order"]].map(([k, v]) => (
             <div key={k} className="flex items-center justify-between"><dt className="text-ink-muted">{v}</dt><dd><span className="kbd">{k}</span></dd></div>
           ))}
         </dl>

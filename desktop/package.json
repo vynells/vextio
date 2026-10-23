@@ -1,7 +1,7 @@
 {
   "name": "vextio-orders",
   "productName": "Vextio Orders",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Order management for Vextio.",
   "author": "Vextio",
   "private": true,
@@ -9,6 +9,7 @@
   "scripts": {
     "build": "vite build",
     "dist": "vite build && electron-builder --win nsis --x64 --publish never",
+    "release": "vite build && electron-builder --win nsis --x64 --publish always",
     "web": "vite --port 5174",
     "start": "vite build && electron ."
   },
@@ -43,9 +44,10 @@
       "uninstallerIcon": "build/icon.ico",
       "artifactName": "Vextio-Orders-Setup-${version}.exe"
     },
-    "publish": null
+    "publish": [{ "provider": "github", "owner": "vynells", "repo": "vextio", "releaseType": "release" }]
   },
   "dependencies": {
+    "electron-updater": "^6.3.9",
     "motion": "^12.43.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"

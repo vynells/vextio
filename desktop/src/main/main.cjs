@@ -125,6 +125,7 @@ function updateTray() {
     { type: "separator" },
     { label: "Notifications", type: "checkbox", checked: config.notify, click: (i) => { config.notify = i.checked; saveConfig(); send("config", publicConfig()); } },
     { type: "separator" },
+    ...(update.state === "ready" ? [{ label: `Restart to update to ${update.version}`, click: () => { quitting = true; updater.quitAndInstall(false, true); } }] : []),
     { label: "Quit Vextio Orders", click: () => { quitting = true; app.quit(); } },
   ]));
 }
@@ -234,6 +235,37 @@ ipcMain.on("window", (_e, cmd) => {
 });
 ipcMain.handle("window:isMaximized", () => !!win?.isMaximized());
 
+// ---------- Updates ----------
+// New versions are published as GitHub releases. The app checks on start and every few hours,
+// downloads in the background, and installs when it restarts.
+let updater = null, update = { state: "idle" };
+function setUpdate(next) { update = next; send("update", update); updateTray(); }
+function setupUpdates() {
+  if (!app.isPackaged) { update = { state: "dev" }; return; }
+  try { updater = require("electron-updater").autoUpdater; } catch { return; }
+  updater.autoDownload = true;
+  updater.autoInstallOnAppQuit = true;
+  updater.on("checking-for-update", () => setUpdate({ state: "checking" }));
+  updater.on("update-not-available", () => setUpdate({ state: "current", checkedAt: Date.now() }));
+  updater.on("update-available", (i) => setUpdate({ state: "downloading", version: i.version, percent: 0 }));
+  updater.on("download-progress", (p) => setUpdate({ ...update, state: "downloading", percent: Math.round(p.percent) }));
+  updater.on("update-downloaded", (i) => {
+    setUpdate({ state: "ready", version: i.version });
+    if (Notification.isSupported()) {
+      const note = new Notification({ title: `Vextio Orders ${i.version} is ready`, body: "Restart the app to finish updating. It also installs next time you quit.", icon: iconPath() });
+      note.on("click", () => show());
+      note.show();
+    }
+  });
+  updater.on("error", (e) => setUpdate({ state: "error", message: String(e?.message || e).split(/\r?\n/)[0].slice(0, 200) }));
+  const check = () => updater.checkForUpdates().catch(() => {});
+  setTimeout(check, 8_000);
+  setInterval(check, 4 * 3600_000);
+}
+ipcMain.handle("update:get", () => update);
+ipcMain.handle("update:check", () => { if (updater) updater.checkForUpdates().catch(() => {}); return update; });
+ipcMain.handle("update:install", () => { if (updater && update.state === "ready") { quitting = true; updater.quitAndInstall(false, true); } });
+
 // ---------- Life cycle ----------
 app.on("second-instance", () => show());
 app.on("before-quit", () => { quitting = true; });
@@ -242,6 +274,7 @@ app.whenReady().then(() => {
   Menu.setApplicationMenu(null);
   createWindow();
   createTray();
+  setupUpdates();
   if (getToken()) startPolling();
 });
 app.on("window-all-closed", () => { if (process.platform !== "darwin") app.quit(); });

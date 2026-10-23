@@ -1,4 +1,5 @@
 // The API behind the Vextio Orders desktop app. Every route except login needs the app's token.
+import { put } from "@vercel/blob";
 import { db } from "@vercel/postgres";
 import { getSettings, notifyList, q, saveSettings, type ShopSettings } from "@/lib/db";
 import { emailCustomer, mailConfigured, resend, siteUrl, SUPPORT_FROM, type MailKind } from "@/lib/order-mail";
@@ -96,6 +97,42 @@ async function setStatus(o: OrderRow, status: Status, patch?: { courier: string;
     client.release();
   }
   return { short, restocked: giveBack };
+}
+
+const slugify = (text: string) => text.toLowerCase().trim().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "").slice(0, 100);
+
+const httpsUrl = (v: unknown) => {
+  const u = String(v ?? "").trim();
+  return /^https:\/\/\S+$/.test(u) && u.length < 1000 ? u : "";
+};
+
+/** Checks and tidies a product sent from the app. Returns an error message when something's wrong. */
+function productFields(body: Body) {
+  const name = s(body, "name", 120);
+  if (!name) return "Give the product a name.";
+  const sizes: Record<string, number> = {};
+  if (body.sizes && typeof body.sizes === "object") {
+    for (const [k, n] of Object.entries(body.sizes as Record<string, unknown>)) {
+      const size = k.trim().toUpperCase().slice(0, 12);
+      const qty = Math.round(Number(n));
+      if (size && Number.isFinite(qty) && qty >= 0) sizes[size] = Math.min(qty, 100000);
+    }
+  }
+  const extras = Array.isArray(body.extra_image_urls) ? body.extra_image_urls.map(httpsUrl).filter(Boolean).slice(0, 12) : [];
+  return {
+    name,
+    detail: s(body, "detail", 200) || "—",
+    price: s(body, "price", 40) || "—",
+    badge: s(body, "badge", 30) || null,
+    image_url: httpsUrl(body.image_url) || "https://placehold.co/400x500/1C1917/9B9188?text=No+image",
+    back_image_url: httpsUrl(body.back_image_url) || null,
+    extra_image_urls: extras,
+    description: s(body, "description", 4000) || null,
+    sizes,
+    size_chart_url: httpsUrl(body.size_chart_url) || null,
+    category_id: s(body, "category_id", 120) || null,
+    subcategory_id: s(body, "subcategory_id", 120) || null,
+  };
 }
 
 async function supportReady() {
@@ -254,6 +291,82 @@ async function handle(req: Request, path: string[]) {
     } finally {
       client.release();
     }
+  }
+
+  // ---- Products ----
+  if (method === "GET" && a === "products") {
+    const [products, categories, subcategories] = await Promise.all([
+      q("SELECT * FROM products ORDER BY created_at DESC"),
+      q("SELECT id, name, sort_order FROM categories ORDER BY sort_order, name"),
+      q("SELECT id, category_id, name, sort_order FROM subcategories ORDER BY sort_order, name"),
+    ]);
+    return json({ products, categories, subcategories });
+  }
+  if (method === "POST" && a === "products") {
+    const id = b ? decodeURIComponent(b) : slugify(s(body, "id", 120) || s(body, "name", 120));
+    if (b && c === "delete") {
+      const [p] = await q<{ name: string }>("DELETE FROM products WHERE id = $1 RETURNING name", [id]);
+      return p ? json({ ok: `${p.name} deleted.` }) : fail("Product not found.", 404);
+    }
+    const v = productFields(body);
+    if (typeof v === "string") return fail(v, 400, { name: v });
+    if (!b) {
+      if (!id) return fail("Give the product a name.", 400, { name: "Give the product a name." });
+      const [taken] = await q("SELECT id FROM products WHERE id = $1", [id]);
+      if (taken) return fail("A product with that ID already exists.", 400, { id: "Pick a different ID." });
+      await q(
+        `INSERT INTO products (id, name, detail, price, badge, image_url, back_image_url, extra_image_urls, description, sizes, size_chart_url, category_id, subcategory_id)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8::text[], $9, $10::jsonb, $11, $12, $13)`,
+        [id, v.name, v.detail, v.price, v.badge, v.image_url, v.back_image_url, v.extra_image_urls, v.description, JSON.stringify(v.sizes), v.size_chart_url, v.category_id, v.subcategory_id]
+      );
+      return json({ ok: `${v.name} added to the shop.`, id });
+    }
+    const [p] = await q(
+      `UPDATE products SET name = $2, detail = $3, price = $4, badge = $5, image_url = $6, back_image_url = $7,
+         extra_image_urls = $8::text[], description = $9, sizes = $10::jsonb, size_chart_url = $11, category_id = $12, subcategory_id = $13
+       WHERE id = $1 RETURNING id`,
+      [id, v.name, v.detail, v.price, v.badge, v.image_url, v.back_image_url, v.extra_image_urls, v.description, JSON.stringify(v.sizes), v.size_chart_url, v.category_id, v.subcategory_id]
+    );
+    return p ? json({ ok: "Product saved.", id }) : fail("Product not found.", 404);
+  }
+
+  // ---- Shop sections (categories and subcategories) ----
+  if (method === "POST" && a === "categories") {
+    if (b && c === "delete") {
+      await q("DELETE FROM subcategories WHERE category_id = $1", [decodeURIComponent(b)]);
+      await q("DELETE FROM categories WHERE id = $1", [decodeURIComponent(b)]);
+      return json({ ok: "Section removed. Its products are kept." });
+    }
+    const name = s(body, "name", 80);
+    if (!name) return fail("Name the section.", 400, { name: "Name the section." });
+    const [{ n }] = await q<{ n: number }>("SELECT COALESCE(MAX(sort_order), 0)::int + 1 AS n FROM categories");
+    await q("INSERT INTO categories (id, name, sort_order) VALUES ($1, $2, $3) ON CONFLICT (id) DO NOTHING", [slugify(name), name, n]);
+    return json({ ok: `${name} added.` });
+  }
+  if (method === "POST" && a === "subcategories") {
+    if (b && c === "delete") {
+      await q("DELETE FROM subcategories WHERE id = $1", [decodeURIComponent(b)]);
+      return json({ ok: "Removed. Its products are kept." });
+    }
+    const name = s(body, "name", 80), categoryId = s(body, "categoryId", 120);
+    if (!name || !categoryId) return fail("Pick a section and a name.");
+    const [{ n }] = await q<{ n: number }>("SELECT COALESCE(MAX(sort_order), 0)::int + 1 AS n FROM subcategories WHERE category_id = $1", [categoryId]);
+    await q("INSERT INTO subcategories (id, category_id, name, sort_order) VALUES ($1, $2, $3, $4) ON CONFLICT (id) DO NOTHING",
+      [`${categoryId}-${slugify(name)}`, categoryId, name, n]);
+    return json({ ok: `${name} added.` });
+  }
+
+  // ---- Photo upload (the app sends a resized JPEG as base64) ----
+  if (method === "POST" && a === "upload") {
+    const data = String(body.data ?? "");
+    const type = s(body, "type", 40) || "image/jpeg";
+    if (!/^image\/(jpeg|png|webp)$/.test(type)) return fail("Only JPG, PNG or WebP photos.");
+    const bytes = Buffer.from(data, "base64");
+    if (bytes.length < 100 || bytes.length > 4_000_000) return fail("That photo is too big. Try a smaller one.");
+    const ext = type === "image/png" ? "png" : type === "image/webp" ? "webp" : "jpg";
+    const name = slugify(s(body, "name", 80).replace(/\.[a-z0-9]+$/i, "")) || "photo";
+    const blob = await put(`products/${Date.now()}-${name}.${ext}`, bytes, { access: "public", contentType: type });
+    return json({ url: blob.url });
   }
 
   // ---- Support ----

@@ -2,13 +2,14 @@ import { motion } from "motion/react";
 import type { Me } from "../bridge";
 import { Icon, type IconName } from "./kit";
 
-export type Screen = "orders" | "customers" | "stock" | "support" | "settings";
+export type Screen = "orders" | "customers" | "products" | "stock" | "support" | "settings";
 const items: { k: Screen; label: string; icon: IconName; key: string }[] = [
   { k: "orders", label: "Orders", icon: "orders", key: "1" },
   { k: "customers", label: "Customers", icon: "customers", key: "2" },
-  { k: "stock", label: "Stock", icon: "tag", key: "3" },
-  { k: "support", label: "Support", icon: "inbox", key: "4" },
-  { k: "settings", label: "Settings", icon: "settings", key: "5" },
+  { k: "products", label: "Products", icon: "store", key: "3" },
+  { k: "stock", label: "Stock", icon: "tag", key: "4" },
+  { k: "support", label: "Support", icon: "inbox", key: "5" },
+  { k: "settings", label: "Settings", icon: "settings", key: "6" },
 ];
 
 export default function Sidebar({ screen, go, action, support, me, onSignOut, onOpenShop }: { screen: Screen; go: (s: Screen) => void; action: number; support: number; me: Me | null; onSignOut: () => void; onOpenShop: () => void }) {

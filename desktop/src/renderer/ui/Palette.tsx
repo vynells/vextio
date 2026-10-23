@@ -19,6 +19,7 @@ export default function Palette({ open, seed = "", onClose, orders, go, openOrde
     const all: Item[] = [
       { id: "s-o", label: "Go to Orders", icon: "orders", run: () => go("orders") },
       { id: "s-c", label: "Go to Customers", icon: "customers", run: () => go("customers") },
+      { id: "s-p", label: "Go to Products", icon: "store", run: () => go("products") },
       { id: "s-t", label: "Go to Stock", icon: "tag", run: () => go("stock") },
       { id: "s-h", label: "Go to Support", icon: "inbox", run: () => go("support") },
       { id: "s-s", label: "Go to Settings", icon: "settings", run: () => go("settings") },

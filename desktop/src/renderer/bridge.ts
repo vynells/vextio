@@ -3,6 +3,7 @@
 
 export type Me = { id: number; login: string; name: string; role: "owner" | "staff" };
 export type Config = { server: string; notify: boolean; sound: boolean; closeToTray: boolean; openAtLogin: boolean; signedIn: boolean; me: Me | null; version: string; platform: string };
+export type Update = { state: "idle" | "dev" | "checking" | "current" | "downloading" | "ready" | "error"; version?: string; percent?: number; message?: string; checkedAt?: number };
 export type ApiResult<T = any> = { ok: boolean; status: number; data: T & { error?: string; fields?: Record<string, string>; ok?: string } };
 type Off = () => void;
 
@@ -25,6 +26,10 @@ export type Bridge = {
   onOnline(fn: (v: boolean) => void): Off;
   onSignedOut(fn: (why?: string) => void): Off;
   onConfig(fn: (c: Config) => void): Off;
+  getUpdate(): Promise<Update>;
+  checkUpdate(): Promise<Update>;
+  installUpdate(): Promise<void>;
+  onUpdate(fn: (u: Update) => void): Off;
 };
 
 function browserBridge(): Bridge {
@@ -63,6 +68,7 @@ function browserBridge(): Bridge {
     isMaximized: async () => false,
     onMaximized: on("max"), onNavigate: on("nav"), onRefresh: on("refresh"), onAction: on("action"), onSupport: on("support"),
     onOnline: on("online"), onSignedOut: on("signed-out"), onConfig: on("config"),
+    getUpdate: async () => ({ state: "dev" }), checkUpdate: async () => ({ state: "dev" }), installUpdate: async () => {}, onUpdate: on("update"),
   };
 }
 

@@ -6,6 +6,7 @@ import Login from "./screens/Login";
 import OrderDrawer from "./screens/OrderDrawer";
 import Orders, { type Filter } from "./screens/Orders";
 import SettingsScreen from "./screens/Settings";
+import Products from "./screens/Products";
 import Stock from "./screens/Stock";
 import Support from "./screens/Support";
 import { needsAction, type Order } from "./status";
@@ -101,6 +102,7 @@ function Workspace({ me, config, setConfig, onSignOut }: { me: Me; config: Confi
       bridge.onRefresh(() => load()),
       bridge.onOnline(setOnline),
       bridge.onSupport(setSupport),
+      bridge.onUpdate((u) => { if (u.state === "ready") toast(`Vextio Orders ${u.version} is ready.`, "info", { label: "Restart", run: () => bridge.installUpdate() }); }),
       bridge.onNavigate((route) => {
         if (route.startsWith("order:")) { setScreen("orders"); setSelected(route.slice(6)); load(); }
         else if (route === "orders:action") { setScreen("orders"); setFilter("action"); }
@@ -108,7 +110,7 @@ function Workspace({ me, config, setConfig, onSignOut }: { me: Me; config: Confi
       }),
     ];
     return () => offs.forEach((f) => f());
-  }, [load]);
+  }, [load, toast]);
 
   // Taskbar badge: a small lime square with the number of orders that need action.
   const action = orders.filter((o) => needsAction(o.status)).length;
@@ -126,9 +128,10 @@ function Workspace({ me, config, setConfig, onSignOut }: { me: Me; config: Confi
   useKey("mod+k", (e) => { e.preventDefault(); setPalette((p) => !p); });
   useKey("mod+1", () => go("orders"));
   useKey("mod+2", () => go("customers"));
-  useKey("mod+3", () => go("stock"));
-  useKey("mod+4", () => go("support"));
-  useKey("mod+5", () => go("settings"));
+  useKey("mod+3", () => go("products"));
+  useKey("mod+4", () => go("stock"));
+  useKey("mod+5", () => go("support"));
+  useKey("mod+6", () => go("settings"));
   useKey("f5", (e) => { e.preventDefault(); load(true); }, [load]);
   useKey("mod+r", (e) => { e.preventDefault(); load(true); }, [load]);
 
@@ -142,6 +145,7 @@ function Workspace({ me, config, setConfig, onSignOut }: { me: Me; config: Confi
             <motion.div key={screen} className="h-full" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.22, ease }}>
               {screen === "orders" && <Orders me={me} orders={orders} loaded={loaded} filter={filter} setFilter={setFilter} selected={selected} open={setSelected} />}
               {screen === "customers" && <Customers version={version} onFindOrders={(email) => { setSeed(email); setPalette(true); }} />}
+              {screen === "products" && <Products version={version} />}
               {screen === "stock" && <Stock version={version} />}
               {screen === "support" && <Support version={version} onChanged={() => load()} />}
               {screen === "settings" && <SettingsScreen config={config} setConfig={setConfig} onSignOut={onSignOut} />}
