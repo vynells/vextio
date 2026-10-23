@@ -15,6 +15,9 @@ type TrackedOrder = {
   total: string;
   createdAt: string;
   updatedAt: string;
+  courier?: string | null;
+  trackingNumber?: string | null;
+  trackingUrl?: string | null;
 };
 
 const FLOW = ["pending", "processing", "shipped", "delivered"];
@@ -143,6 +146,21 @@ export default function TrackOrderPage() {
                   />
                 </div>
               </div>
+            </div>
+          )}
+
+          {!isException && (order.courier || order.trackingNumber) && (
+            <div className="mb-10 border border-brown/15 bg-tan/30 p-5 text-[14px] text-brown">
+              <p className="mb-1 text-[11px] font-medium uppercase tracking-wide text-muted">Shipping</p>
+              <p>
+                {order.courier || "Courier"}
+                {order.trackingNumber && <> · Tracking number <strong>{order.trackingNumber}</strong></>}
+              </p>
+              {order.trackingUrl && /^https?:\/\//.test(order.trackingUrl) && (
+                <a href={order.trackingUrl} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-rust underline">
+                  Track with the courier
+                </a>
+              )}
             </div>
           )}
 

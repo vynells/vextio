@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useEffect, useState, FormEvent } from "react";
 import Image from "next/image";
 import { useCart } from "@/components/CartContext";
 import { parsePrice, formatPKR } from "@/lib/price";
@@ -22,7 +22,14 @@ export default function CheckoutPage() {
     (sum, item) => sum + parsePrice(item.price) * item.qty,
     0
   );
-  const shipping = items.length > 0 ? 300 : 0;
+  const [shippingFee, setShippingFee] = useState(300);
+  useEffect(() => {
+    fetch("/api/shipping")
+      .then((r) => r.json())
+      .then((d) => typeof d.fee === "number" && setShippingFee(d.fee))
+      .catch(() => {});
+  }, []);
+  const shipping = items.length > 0 ? shippingFee : 0;
 
   const [contact, setContact] = useState("");
   const [firstName, setFirstName] = useState("");

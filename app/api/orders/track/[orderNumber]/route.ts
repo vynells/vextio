@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sql } from "@vercel/postgres";
+import { q } from "@/lib/db";
 
 export async function GET(
   req: NextRequest,
@@ -7,11 +7,13 @@ export async function GET(
 ) {
   const { orderNumber } = await params;
 
-  const { rows } = await sql`
-    SELECT order_number, status, first_name, city, items, total, created_at, updated_at
-    FROM orders
-    WHERE order_number = ${orderNumber}
-  `;
+  const rows = await q<Record<string, unknown>>(
+    `SELECT order_number, status, first_name, city, items, total, created_at, updated_at,
+            courier, tracking_number, tracking_url
+     FROM orders
+     WHERE order_number = $1`,
+    [orderNumber]
+  );
 
   if (rows.length === 0) {
     return NextResponse.json({ error: "Order not found" }, { status: 404 });
@@ -28,5 +30,8 @@ export async function GET(
     total: order.total,
     createdAt: order.created_at,
     updatedAt: order.updated_at,
+    courier: order.courier,
+    trackingNumber: order.tracking_number,
+    trackingUrl: order.tracking_url,
   });
 }

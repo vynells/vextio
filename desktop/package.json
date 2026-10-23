@@ -1,0 +1,71 @@
+{
+  "name": "vextio-orders",
+  "productName": "Vextio Orders",
+  "version": "1.0.0",
+  "description": "Order management for Vextio.",
+  "author": "Vextio",
+  "private": true,
+  "main": "src/main/main.cjs",
+  "scripts": {
+    "build": "vite build",
+    "dist": "vite build && electron-builder --win nsis --x64 --publish never",
+    "web": "vite --port 5174",
+    "start": "vite build && electron ."
+  },
+  "build": {
+    "appId": "com.vextio.orders",
+    "productName": "Vextio Orders",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/main/**",
+      "dist/**",
+      "build/icon.png",
+      "build/tray*.png",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.ico",
+      "signAndEditExecutable": false
+    },
+    "afterPack": "scripts/after-pack.cjs",
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Vextio Orders",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "artifactName": "Vextio-Orders-Setup-${version}.exe"
+    },
+    "publish": null
+  },
+  "dependencies": {
+    "motion": "^12.43.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^4.7.0",
+    "autoprefixer": "^10.6.1",
+    "electron": "^33.4.11",
+    "electron-builder": "^25.1.8",
+    "png-to-ico": "^2.1.8",
+    "postcss": "^8.5.31",
+    "resedit": "^2.0.3",
+    "tailwindcss": "^3.4.19",
+    "typescript": "^5.9.3",
+    "vite": "^6.4.5"
+  },
+  "allowScripts": {
+    "electron@33.4.11": true,
+    "esbuild@0.25.12": true
+  }
+}

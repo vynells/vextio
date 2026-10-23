@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Resend } from "resend";
 import { db } from "@vercel/postgres";
 import { parsePrice, formatPKR } from "@/lib/price";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { getSettings, notifyList } from "@/lib/db";
+import { escapeHtml, resend, siteUrl } from "@/lib/order-mail";
 
 const PAYMENT_METHODS = ["Cash on Delivery", "Card (Debit & Credit)", "Bank transfer", "Easypaisa"];
 const MAX_QTY_PER_LINE = 20;
@@ -20,12 +19,6 @@ type OrderLine = {
   imageUrl?: string;
 };
 
-function getSiteUrl(): string {
-  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL;
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
-  return "http://localhost:3000";
-}
-
 function generateOrderNumber(): string {
   const datePart = new Date()
     .toISOString()
@@ -33,15 +26,6 @@ function generateOrderNumber(): string {
     .replace(/-/g, ""); // YYMMDD
   const randomPart = Math.floor(100000 + Math.random() * 900000).toString(); // 6 random digits
   return `${datePart}${randomPart}`;
-}
-
-function escapeHtml(value: unknown): string {
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
 }
 
 function cleanString(value: unknown, field: string, maxLen: number, required = true): string {
@@ -109,6 +93,9 @@ export async function POST(req: NextRequest) {
   let shipping = 0;
   let total = 0;
 
+  // Also creates the columns and settings table the order app relies on, if they're missing.
+  const settings = await getSettings();
+
   const client = await db.connect();
   try {
     await client.sql`BEGIN`;
@@ -145,24 +132,24 @@ export async function POST(req: NextRequest) {
     }
 
     subtotal = items.reduce((sum, item) => sum + parsePrice(item.price) * item.qty, 0);
-    shipping = items.length > 0 ? 300 : 0;
+    shipping = items.length > 0 ? Number(settings.shipping_fee) || 0 : 0;
     total = subtotal + shipping;
 
     await client.sql`
       INSERT INTO orders (
         order_number, status, contact, first_name, last_name, address, apartment,
-        city, postal_code, phone, payment_method, items, subtotal, shipping, total
+        city, postal_code, phone, payment_method, items, subtotal, shipping, total, stock_taken
       )
       VALUES (
         ${orderNumber}, ${initialStatus}, ${contact}, ${firstName}, ${lastName}, ${address}, ${apartment || null},
         ${city}, ${postalCode || null}, ${phone}, ${paymentMethod},
-        ${JSON.stringify(items)}::jsonb, ${subtotal}, ${shipping}, ${total}
+        ${JSON.stringify(items)}::jsonb, ${subtotal}, ${shipping}, ${total}, ${initialStatus === "processing"}
       )
     `;
 
     // Only decrement stock immediately for orders that start as "processing" (i.e. COD).
     // Orders awaiting payment confirmation ("pending") only decrement stock once
-    // they're moved to "processing" from the ops app.
+    // they're confirmed in Vextio Orders.
     if (initialStatus === "processing") {
       for (const item of items) {
         if (!item.size) continue;
@@ -243,7 +230,7 @@ export async function POST(req: NextRequest) {
     // --- Email to Vextio (admin) ---
     await resend.emails.send({
       from: "Vextio Orders <orders@blackoutmc.xyz>",
-      to: ["vynelia4@gmail.com", "mohsin.rasheed2010@gmail.com"],
+      to: notifyList(settings),
       subject: `New order ${orderNumber} from ${firstName} ${lastName}`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px;">
@@ -315,7 +302,7 @@ export async function POST(req: NextRequest) {
             </div>
 
             <div style="padding: 8px 24px 24px;">
-              <a href="${getSiteUrl()}/track/${orderNumber}" style="display:inline-block;background:#8A3418;color:#F5EFE6;text-decoration:none;padding:12px 28px;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;border-radius:2px;">
+              <a href="${siteUrl()}/track/${orderNumber}" style="display:inline-block;background:#8A3418;color:#F5EFE6;text-decoration:none;padding:12px 28px;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;border-radius:2px;">
                 Track your order
               </a>
             </div>

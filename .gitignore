@@ -22,3 +22,8 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
+
+# Vextio Orders desktop app
+desktop/node_modules
+desktop/dist
+desktop/release

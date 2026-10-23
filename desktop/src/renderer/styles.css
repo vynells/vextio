@@ -1,0 +1,48 @@
+@font-face { font-family: "Anton"; src: url("./fonts/Anton-Regular.ttf") format("truetype"); font-weight: 400; font-display: block; }
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body, #root { height: 100%; }
+  body { @apply bg-bg font-sans text-[14px] leading-normal text-ink antialiased; overflow: hidden; user-select: none; -webkit-font-smoothing: antialiased; }
+  input, textarea, select, [data-selectable] { user-select: text; }
+  ::selection { @apply bg-pink text-night; }
+  :focus-visible { outline: 2px solid #9cb832; outline-offset: 2px; border-radius: 6px; }
+  h1, h2, h3 { @apply font-display font-normal uppercase; letter-spacing: 0.01em; font-synthesis: none; }
+  button { cursor: default; }
+  a { cursor: pointer; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.08); border-radius: 8px; border: 2px solid transparent; background-clip: padding-box; }
+  ::-webkit-scrollbar-thumb:hover { background-color: rgba(255,255,255,.16); }
+  ::-webkit-scrollbar-track { background: transparent; }
+}
+
+@layer components {
+  .font-display { font-synthesis: none; font-weight: 400 !important; letter-spacing: 0.01em; }
+  .drag { -webkit-app-region: drag; }
+  .no-drag { -webkit-app-region: no-drag; }
+  .card { @apply rounded-xl bg-surface ring-1 ring-line; }
+  .btn {
+    @apply inline-flex h-9 select-none items-center justify-center gap-2 whitespace-nowrap rounded-lg px-3.5 text-[13px] font-semibold outline-none;
+    transition: background-color .15s, color .15s, opacity .15s, transform .2s cubic-bezier(.22,1,.36,1);
+  }
+  .btn:active:not(:disabled) { transform: scale(0.96); }
+  .btn:disabled { @apply opacity-50; }
+  .btn-primary { @apply bg-paper text-night shadow-[3px_3px_0_0_#c23b3b] hover:bg-pink; }
+  .btn-accent { @apply bg-pink text-night hover:bg-[#b2cf45]; }
+  .btn-ghost { @apply bg-white/[0.06] text-ink hover:bg-white/[0.1]; }
+  .btn-quiet { @apply text-ink-muted hover:bg-white/[0.06] hover:text-ink; }
+  .btn-danger { @apply bg-coral/15 text-coral ring-1 ring-coral/30 hover:bg-coral/25; }
+  .label { @apply text-[11px] font-semibold uppercase tracking-[0.09em] text-ink-muted; }
+  .input {
+    @apply mt-1.5 w-full rounded-lg bg-white/[0.04] px-3 py-2.5 text-[13.5px] text-ink outline-none ring-1 ring-white/[0.08] transition placeholder:text-ink-muted/70 focus:bg-white/[0.06] focus:ring-2 focus:ring-pink;
+  }
+  .input[aria-invalid="true"] { @apply ring-2 ring-coral; }
+  .kbd { @apply rounded border border-white/10 bg-white/[0.04] px-1.5 py-0.5 font-sans text-[11px] font-semibold text-ink-muted; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
