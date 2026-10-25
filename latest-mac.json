@@ -1,0 +1,16 @@
+{
+  "version": "1.1.0",
+  "releaseDate": "2026-10-25T01:03:04.703Z",
+  "files": {
+    "arm64": {
+      "name": "P4P-Orders-1.1.0-Mac-Apple-Silicon.zip",
+      "size": 88501561,
+      "sha256": "69db26cb4a975f0f4fbbe8e81ae2d89c708908be7c429197b7c4c86b6e5902e7"
+    },
+    "x64": {
+      "name": "P4P-Orders-1.1.0-Mac-Intel.zip",
+      "size": 94564639,
+      "sha256": "7ccf30dd9b33c3bc9ee5fdc4b8068cb8387533d7469e1c5c438a6298e2cef017"
+    }
+  }
+}

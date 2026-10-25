@@ -1,0 +1,8 @@
+version: 1.1.0
+files:
+  - url: P4P-Orders-Setup-1.1.0.exe
+    sha512: e3jpZhFijfZcjbPbz5Pa9o0hobV71CwtGS8IAM60GrUFnrQL52+vJ3IgbWiRmmeKBrS9UYFHPptnR0X5g5Y8jg==
+    size: 75144573
+path: P4P-Orders-Setup-1.1.0.exe
+sha512: e3jpZhFijfZcjbPbz5Pa9o0hobV71CwtGS8IAM60GrUFnrQL52+vJ3IgbWiRmmeKBrS9UYFHPptnR0X5g5Y8jg==
+releaseDate: '2026-10-25T01:02:44.551Z'
